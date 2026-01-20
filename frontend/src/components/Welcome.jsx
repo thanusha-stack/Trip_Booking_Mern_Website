@@ -1,7 +1,10 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import Button from "react-bootstrap/Button";
+import { useAuth } from "../context/AuthContext";
 
 const Welcome = () => {
+  const { user, logout } = useAuth();
   return (
     <div
       style={{
@@ -76,6 +79,17 @@ const Welcome = () => {
               Contact
             </NavLink>
 
+              </li>
+              <li>
+                  {user ? (
+                  <button onClick={logout} className="btn btn-outline-light">
+                    Profile
+                  </button>
+                ) : (
+                  <NavLink to="/login" className="btn btn-light">
+                    Login
+                  </NavLink>
+                )}
               </li>
             </ul>
           </div>

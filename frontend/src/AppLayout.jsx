@@ -1,39 +1,77 @@
-import React,{useState} from 'react';    
-import { BrowserRouter as Router, Routes, Route,useLocation } from 'react-router-dom';
-import NavbarR from './components/NavbarR';
-import Welcome from './components/Welcome';
-import About from './pages/About';
-import Home from './pages/Home';
-import Contact from './pages/Contact';
-import Details from './components/Details';
-import Places from './pages/Places';
-import Booking from './pages/Booking';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./routes/ProtectedRoute";
+
+import NavbarR from "./components/NavbarR";
+import Welcome from "./components/Welcome";
+
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Places from "./pages/Places";
+import Details from "./components/Details";
+import Booking from "./pages/Booking";
+import Login from "./pages/Login";
+import Profile from "./pages/Profile";
+
+
+// 🔹 Handles navbar switching based on route
 const LayoutContent = () => {
   const location = useLocation();
-  const isHome = location.pathname === "/";
+  const isWelcomePage = location.pathname === "/";
 
   return (
     <>
-      {!isHome && <NavbarR />}
-      {isHome && <Welcome />}
+      {/* Navbar Logic */}
+      {isWelcomePage ? <Welcome /> : <NavbarR />}
+
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact/>} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/places" element={<Places />} />
         <Route path="/place/:name" element={<Details />} />
-        <Route path="/book/:name" element={<Booking />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/book/:name"
+          element={
+            <ProtectedRoute>
+              <Booking />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );
 };
 
+// 🔹 Root App Layout
 const AppLayout = () => {
   return (
-    <Router>  
-      <LayoutContent />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <LayoutContent />
+      </Router>
+    </AuthProvider>
   );
 };
 
