@@ -1,35 +1,31 @@
-import React, { createContext, useContext, useState } from "react";
-import { signInWithPopup, signOut } from "firebase/auth";
-import { auth, googleProvider } from "../firebase";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); 
 
-  const googleLogin = async () => {
-    const result = await signInWithPopup(auth, googleProvider);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
 
-    const userData = {
-      name: result.user.displayName,
-      email: result.user.email,
-      photo: result.user.photoURL,
-      uid: result.user.uid,
-    };
+    if (token) {
+      setUser(true); // later you can store decoded user object
+    } else {
+      setUser(null);
+    }
 
-    localStorage.setItem("user", JSON.stringify(userData));
-    setUser(userData);
-  };
+    setLoading(false);
+  }, []);
 
-  const logout = async () => {
-    await signOut(auth);
-    localStorage.removeItem("user");
+  const logout = () => {
+    localStorage.removeItem("token");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, googleLogin, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, setUser, logout }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

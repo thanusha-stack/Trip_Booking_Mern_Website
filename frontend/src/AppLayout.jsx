@@ -24,16 +24,11 @@ import Profile from "./pages/Profile";
 
 // 🔹 Handles navbar switching based on route
 const LayoutContent = () => {
-  const location = useLocation();
-  const isWelcomePage = location.pathname === "/";
-
   return (
     <>
-      {/* Navbar Logic */}
-      {isWelcomePage ? <Welcome /> : <NavbarR />}
+      <NavbarR />
 
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
@@ -41,7 +36,6 @@ const LayoutContent = () => {
         <Route path="/place/:name" element={<Details />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Protected Routes */}
         <Route
           path="/book/:name"
           element={

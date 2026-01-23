@@ -10,6 +10,7 @@ import Footer from '../components/Footer';
 function Home() {
   return (
     <div>
+      <Welcome />
       <Testimonials />
       <div className="container mt-5">
       <h2 className="text-center mb-4">Top Places in Mysore</h2>
