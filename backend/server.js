@@ -1,156 +1,164 @@
-//import express framework to create server and API
+// ===== IMPORTS =====
 const express = require("express");
-//import mongoose to connect the node js to MongoDB
 const mongoose = require("mongoose");
-//import bcryptjs to encrypt the password
-const bcrypt=require("bcryptjs");
-//import jsonwebtoken - jwt to create token
-const jwt=require("jsonwebtoken");
-//import cors for accept frontend request
-const cors=require("cors");
-//import googleOAuth
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const cors = require("cors");
+const Stripe = require("stripe");
 const { OAuth2Client } = require("google-auth-library");
+require("dotenv").config();
 
-//ADD Google client (below imports)
-const client = new OAuth2Client(
-  "878263761108-nnait908lmtn1v4copu10sqv75g9cb85.apps.googleusercontent.com"
+// ===== CONFIG =====
+const SECRET = process.env.SECRET || "mysore-trip-booking-secret";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const app = express();
+app.use(express.json());
+
+// ===== CORS & COOP HEADERS =====
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
 );
 
-//create express server - application
-const app=express();
-//allow server to read the JSON request
-app.use(express.json());
-//allow request from client
-app.use(cors());
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+  next();
+});
 
-//mongoDB connection
-mongoose.connect("mongodb://127.0.0.1:27017/tripBookingDb")
-.then (()=>console.log("MongoDB connected"))
+// ===== MONGODB =====
+mongoose
+  .connect("mongodb://127.0.0.1:27017/tripBookingDb")
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error(err));
 
-//create a model to interact with the connection
-const User=mongoose.model("User",{
-  name:String,
-  email:String,
-  password:{ type:String, default:null },
-  googleId:{ type:String, default:null }
-},"users");
+// ===== MODELS =====
+const User = mongoose.model("User", {
+  name: String,
+  email: String,
+  password: { type: String, default: null },
+});
 
-// ====== NEW: Booking MODEL ======
 const Booking = mongoose.model("Booking", {
-  placeName: { type: String, required: true },
-  userEmail: { type: String, required: true },
-  userPhone: { type: String, required: true },
-  adultCount: { type: Number, required: true, min: 1 },
-  childCount: { type: Number, default: 0 },
-  totalAmount: { type: Number, required: true },
+  placeName: String,
+  userEmail: String,
+  userPhone: String,
+  adultCount: Number,
+  childCount: Number,
+  totalAmount: Number,
+  tripDate: Date,
   payment: {
-    upiId: { type: String },
-    provider: { type: String }
+    paymentIntentId: String,
+    method: String,
+    status: String,
   },
-  emailVerified: { type: Boolean, default: false },
-  phoneVerified: { type: Boolean, default: false },
-  bookingDate: { type: Date, default: Date.now }
+  emailVerified: Boolean,
+  phoneVerified: Boolean,
+  createdAt: { type: Date, default: Date.now },
 });
 
-//register API-POST Method
-app.post("/register",async(req,res)=>{
-    const {name,email,password}= req.body;
-
-    const existing = await User.findOne({email});
-    if(existing){
-        return res.status(400).json({message:"Lavanya gopal, you already registered"});
-    }
-
-    const HashedPassword=await bcrypt.hash(password,10);
-
-    await User.create({name, email, password:HashedPassword});
-    res.json({message:"User added Successfully"});
+// ===== ROUTES =====
+app.get("/", (req, res) => {
+  res.send("Server is running!");
 });
 
-//login API
-app.post("/login",async(req,res)=>{
-    const{email,password}=req.body;
-    const existing = await User.findOne({email});
+// ----- AUTH: REGISTER -----
+app.post("/register", async (req, res) => {
+  const { name, email, password } = req.body;
+  const existing = await User.findOne({ email });
+  if (existing) return res.status(400).json({ message: "User already exists" });
 
-    if(!existing){
-        return res.status(404).json({message:"Email not found!"});
-    }
-
-    if(!existing.password){
-        return res.status(400).json({message:"Use Google Login"});
-    }
-
-    const isMatch=await bcrypt.compare(password,existing.password);
-    if(!isMatch){
-        return res.status(401).json({message:"Invalid Password! Try Again"});
-    }
-    
-    const token = jwt.sign(
-      { id: existing._id },
-      "SECRET_KEY",
-      { expiresIn: "1h" }
-    );
-
-    res.json({ token });
+  const hashed = await bcrypt.hash(password, 10);
+  const user = await User.create({ name, email, password: hashed });
+  const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: "1h" });
+  res.json({ message: "Registered successfully", token, user });
 });
 
-// ✅ GOOGLE LOGIN ROUTE
+// ----- AUTH: LOGIN -----
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) return res.status(400).json({ message: "User not found" });
+
+  const ok = await bcrypt.compare(password, user.password);
+  if (!ok) return res.status(400).json({ message: "Invalid credentials" });
+
+  const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: "1h" });
+  res.json({ token, user });
+});
+
+// ----- GOOGLE LOGIN / REGISTER -----
 app.post("/google-login", async (req, res) => {
+  const { tokenId } = req.body;
   try {
-    const { token } = req.body;
-
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: "878263761108-nnait908lmtn1v4copu10sqv75g9cb85.apps.googleusercontent.com"
+    const ticket = await googleClient.verifyIdToken({
+      idToken: tokenId,
+      audience: process.env.GOOGLE_CLIENT_ID,
     });
-
     const payload = ticket.getPayload();
-    const { email, name, sub } = payload;
+    const { email, name, email_verified } = payload;
+
+    if (!email_verified)
+      return res.status(400).json({ message: "Email not verified by Google" });
 
     let user = await User.findOne({ email });
-
     if (!user) {
-      user = await User.create({
-        name,
-        email,
-        googleId: sub
-      });
+      // Register new Google user
+      user = await User.create({ name, email, password: null });
     }
 
-    const jwtToken = jwt.sign(
-      { id: user._id },
-      "SECRET_KEY",
-      { expiresIn: "1h" }
-    );
-
-    res.json({ token: jwtToken });
-
+    const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: "1h" });
+    res.json({ token, user });
   } catch (err) {
     console.error(err);
-    res.status(401).json({ message: "Google login failed" });
+    res.status(500).json({ message: "Google login failed", error: err.message });
   }
 });
 
-// ====== NEW: CREATE BOOKING ======
-app.post("/api/bookings", async (req,res) => {
+// ----- STRIPE PAYMENT -----
+app.post("/api/payment/create-intent", async (req, res) => {
   try {
-    const booking = await Booking.create(req.body);
-    res.json({ message: "Booking successful", booking });
-  } catch(err) {
+    const { amount } = req.body;
+    const intent = await stripe.paymentIntents.create({
+      amount: amount * 100,
+      currency: "inr",
+      payment_method_types: ["card"],
+    });
+    res.json({ clientSecret: intent.client_secret });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// ====== NEW: GET BOOKINGS BY USER ======
-app.get("/api/bookings/:email", async (req,res) => {
+// ----- BOOKINGS -----
+// GET bookings
+app.get("/api/bookings", async (req, res) => {
   try {
-    const bookings = await Booking.find({ userEmail: req.params.email });
-    res.json(bookings);
-  } catch(err) {
+    const { userEmail } = req.query;
+    const filter = userEmail ? { userEmail } : {};
+    const bookings = await Booking.find(filter).sort({ createdAt: -1 });
+    res.json({ bookings });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// POST booking
+app.post("/api/bookings", async (req, res) => {
+  try {
+    const bookingData = req.body;
+    const booking = await Booking.create(bookingData);
+    res.status(200).json({ message: "Booking saved successfully!", booking });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== START SERVER =====
 app.listen(5000, () => {
   console.log("Server running on http://localhost:5000");
 });
