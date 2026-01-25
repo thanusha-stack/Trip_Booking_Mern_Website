@@ -129,7 +129,7 @@ const Booking = () => {
             >
               <h6 className="fw-bold mb-3">Payment Summary</h6>
 
-              {isCombo ? (
+              {isCombo && (
                   <TicketCounter
                     label="Members"
                     price={comboAmount}
@@ -137,27 +137,7 @@ const Booking = () => {
                     setCount={setMembers}
                     min={1}
                   />
-                ) : (
-                  <Row className="mb-3">
-                    <Col>
-                      <TicketCounter
-                        label="Adults"
-                        price={adultFee}
-                        count={adult}
-                        setCount={setAdult}
-                        min={1}
-                      />
-                    </Col>
-                    <Col>
-                      <TicketCounter
-                        label="Children"
-                        price={childFee}
-                        count={child}
-                        setCount={setChild}
-                      />
-                    </Col>
-                  </Row>
-                )}
+                ) }
 
               <hr className="opacity-25 my-2" />
 
