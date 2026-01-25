@@ -1,5 +1,6 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import {Navbar} from 'react-bootstrap';
 
 function NavbarR() {
   const { user, logout } = useAuth();
@@ -9,12 +10,7 @@ function NavbarR() {
   const isHome = location.pathname === "/";
 
   return (
-    <nav
-      className={`navbar navbar-expand-lg navbar-dark ${
-        isHome ? "bg-transparent position-absolute top-0 w-100" : "bg-dark"
-      }`}
-      style={{ zIndex: 1000 }}
-    >
+     <Navbar bg='dark' variant="dark" expand="lg" className="sticky-top shadow-sm">
       <div className="container">
         <NavLink className="navbar-brand fw-bold text-light" to="/">
           Mysore <span className="text-primary">Tourism</span>
@@ -69,7 +65,7 @@ function NavbarR() {
           </ul>
         </div>
       </div>
-    </nav>
+    </Navbar>
   );
 }
 

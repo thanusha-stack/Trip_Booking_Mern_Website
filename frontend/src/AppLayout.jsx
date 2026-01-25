@@ -19,32 +19,31 @@ import Places from "./pages/Places";
 import Details from "./components/Details";
 import Booking from "./pages/Booking";
 import Login from "./pages/Login";
-import Profile from "./pages/Profile";
-
+import Profile from "./pages/profile";
 
 // 🔹 Handles navbar switching based on route
 const LayoutContent = () => {
   return (
     <>
-      <NavbarR />
-
+      
+      <NavbarR className="sticky-top shadow-sm"/>
       <Routes>
+
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/places" element={<Places />} />
         <Route path="/place/:name" element={<Details />} />
         <Route path="/login" element={<Login />} />
-
+        
         <Route
-          path="/book/:name"
+          path="/booking"
           element={
             <ProtectedRoute>
               <Booking />
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/profile"
           element={

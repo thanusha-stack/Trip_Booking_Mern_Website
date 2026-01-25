@@ -1,7 +1,10 @@
 import Carousel from "react-bootstrap/Carousel";
 import carouselData from "../dataset/carouselData";
+import {Button} from "react-bootstrap";
+import {useNavigate} from "react-router-dom";
 
 function Carosel() {
+  const navigate=useNavigate();
   return (
     <div className="container mt-5">
       <h2 className="text-center mb-4">Combos in Mysore Tourism</h2>
@@ -21,7 +24,15 @@ function Carosel() {
             <p>Total Amount: {item.amount}</p>
             <p>Pick Up: {item.pick_up}</p>
             <p>Drop: {item.drop}</p>
-            <button className="btn btn-dark">Book Now</button>
+            <Button
+                variant="dark"
+                size="lg"
+                onClick={() =>
+                  navigate("/booking", { state: { combo: item } })
+                }
+              >
+                Book Now
+              </Button>
           </Carousel.Caption>
         </Carousel.Item>
       ))}

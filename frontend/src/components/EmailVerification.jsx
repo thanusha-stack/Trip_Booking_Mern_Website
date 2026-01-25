@@ -1,65 +1,76 @@
 import { useState } from "react";
-import { Card, Form, Button } from "react-bootstrap";
+import { Form, Button, Row, Col, Badge } from "react-bootstrap";
 
-const EmailVerification = ({ onVerify }) => {
+const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [sentOtp, setSentOtp] = useState("");
   const [verified, setVerified] = useState(false);
 
   const sendOtp = () => {
-    if (!email) return alert("Please enter an email first!");
-    const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
-    setSentOtp(generatedOtp);
-    alert(`OTP sent to ${email}: ${generatedOtp}`); // For demo only
+    if (!email) return alert("Enter email");
+    const gen = Math.floor(1000 + Math.random() * 9000).toString();
+    setSentOtp(gen);
+    alert(`OTP: ${gen}`);
   };
 
   const verifyOtp = () => {
     if (otp === sentOtp) {
       setVerified(true);
-      onVerify(true);
-      alert("Email verified successfully!");
+      onVerify(true);           // sets emailVerified in parent
+      setParentEmail(email);    // sets userEmail in parent Booking page
     } else {
-      alert("Incorrect OTP");
+      alert("Wrong OTP");
     }
   };
 
   return (
-    <div className="p-3 mb-1">
-      <h5>Account Verification</h5>
+    <div>
+      <Form.Label className="small fw-semibold mb-1">
+        Email Verification{" "}
+        {verified && <Badge bg="success">Verified</Badge>}
+      </Form.Label>
 
-      {!verified ? (
+      {!verified && (
         <>
-          <Form.Group className="mb-2">
-            <Form.Label>Email</Form.Label>
-            <Form.Control
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </Form.Group>
+          <Row className="g-1 mb-1">
+            <Col md={8}>
+              <Form.Control
+                size="sm"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Col>
+            <Col md={4}>
+              <Button size="sm" className="w-100" onClick={sendOtp}>
+                Send OTP
+              </Button>
+            </Col>
+          </Row>
 
-          <Button className="mb-2 me-2" onClick={sendOtp} variant="primary">
-            Send OTP
-          </Button>
-
-          <Form.Group className="mb-2">
-            <Form.Label>Enter OTP</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-            />
-          </Form.Group>
-
-          <Button onClick={verifyOtp} variant="success">
-            Verify OTP
-          </Button>
+          <Row className="g-1">
+            <Col md={8}>
+              <Form.Control
+                size="sm"
+                placeholder="OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
+            </Col>
+            <Col md={4}>
+              <Button
+                size="sm"
+                variant="success"
+                className="w-100"
+                onClick={verifyOtp}
+              >
+                Verify
+              </Button>
+            </Col>
+          </Row>
         </>
-      ) : (
-        <p className="text-success fw-bold">Email Verified ✅</p>
       )}
     </div>
   );

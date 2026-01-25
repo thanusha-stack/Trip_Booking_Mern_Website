@@ -1,62 +1,75 @@
 import { useState } from "react";
-import { Form, Button, InputGroup } from "react-bootstrap";
+import { Form, Button, Row, Col, Badge } from "react-bootstrap";
 
-const PhoneVerification = ({ onVerify }) => {
+const PhoneVerification = ({ onVerify, setPhone: setParentPhone }) => {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [sentOtp, setSentOtp] = useState("");
   const [verified, setVerified] = useState(false);
 
   const sendOtp = () => {
-    const generatedOtp = Math.floor(1000 + Math.random() * 9000).toString();
-    setSentOtp(generatedOtp);
-    alert(`OTP sent: ${generatedOtp}`); // Demo only
+    if (!phone) return alert("Enter phone");
+    const gen = Math.floor(1000 + Math.random() * 9000).toString();
+    setSentOtp(gen);
+    alert(`OTP: ${gen}`);
   };
 
   const verifyOtp = () => {
     if (otp === sentOtp) {
       setVerified(true);
-      onVerify(true);
-      alert("Phone verified successfully!");
+      onVerify(true);           // sets phoneVerified in parent
+      setParentPhone(phone);    // sets userPhone in parent Booking page
     } else {
-      alert("Incorrect OTP");
+      alert("Wrong OTP");
     }
   };
 
   return (
-    <div className="p-3 rounded mb-3">
-      {!verified ? (
+    <div className="mt-2">
+      <Form.Label className="small fw-semibold mb-1">
+        Phone Verification{" "}
+        {verified && <Badge bg="success">Verified</Badge>}
+      </Form.Label>
+
+      {!verified && (
         <>
-          <Form.Group className="mb-2">
-            <Form.Label>Phone Number</Form.Label>
-            <Form.Control
-              type="tel"
-              placeholder="Enter phone number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </Form.Group>
+          <Row className="g-1 mb-1">
+            <Col md={8}>
+              <Form.Control
+                size="sm"
+                placeholder="Phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </Col>
+            <Col md={4}>
+              <Button size="sm" className="w-100" onClick={sendOtp}>
+                Send OTP
+              </Button>
+            </Col>
+          </Row>
 
-          <Button className="mb-2" onClick={sendOtp}>
-            Send OTP
-          </Button>
-
-          <Form.Group className="mb-2">
-            <Form.Label>Enter OTP</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-            />
-          </Form.Group>
-
-          <Button variant="success" onClick={verifyOtp}>
-            Verify OTP
-          </Button>
+          <Row className="g-1">
+            <Col md={8}>
+              <Form.Control
+                size="sm"
+                placeholder="OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
+            </Col>
+            <Col md={4}>
+              <Button
+                size="sm"
+                variant="success"
+                className="w-100"
+                onClick={verifyOtp}
+              >
+                Verify
+              </Button>
+            </Col>
+          </Row>
         </>
-      ) : (
-        <p className="text-success fw-bold">Phone Verified ✅</p>
       )}
     </div>
   );

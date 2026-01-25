@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Container,
   Row,
@@ -13,15 +13,12 @@ import {
 import places from "../dataset/placeList";
 
 const Details = () => {
-  const { name } = useParams(); // 👈 get name from URL
+  const { name } = useParams();
+  const navigate = useNavigate();
 
   const place = places.find(
     p => p.name === decodeURIComponent(name)
   );
-
-  if (!place) {
-    return <p className="text-center mt-5">Place not found</p>;
-  }
 
   return (
     <Container className="my-5">
@@ -30,12 +27,7 @@ const Details = () => {
 
           {/* Image */}
           <Col md={6}>
-            <Image
-              src={place.image}
-              fluid
-              rounded
-              alt={place.name}
-            />
+            <Image src={place.image} fluid rounded alt={place.name} />
           </Col>
 
           {/* Details */}
@@ -53,7 +45,7 @@ const Details = () => {
               </ListGroup.Item>
 
               <ListGroup.Item>
-                Child Fee: <strong>₹{place.childFee}</strong> (Age {place.childAgeLimit})
+                Child Fee: <strong>₹{place.childFee}</strong>
               </ListGroup.Item>
 
               <ListGroup.Item>
@@ -65,36 +57,32 @@ const Details = () => {
               </ListGroup.Item>
 
               <ListGroup.Item>
-                Recommended Duration: <strong>{place.recommendedDuration}</strong>
-              </ListGroup.Item>
-
-              <ListGroup.Item>
-                Closed On: <strong>{place.closedOn}</strong>
-              </ListGroup.Item>
-
-              <ListGroup.Item>
                 Refund Policy: <strong>{place.refundPolicy}</strong>
               </ListGroup.Item>
             </ListGroup>
 
             {place.bookingAvailable ? (
-                <Button
+              <Button
                 variant="success"
                 size="lg"
-                as={Link}
-                to={`/book/${encodeURIComponent(place.name)}`}
-                >
+                onClick={() =>
+                  navigate("/booking", {
+                    state: {
+                      name: place.name,
+                      adultFee: place.adultFee,
+                      childFee: place.childFee
+                    }
+                  })
+                }
+              >
                 Book Now
-                </Button>
-
-
+              </Button>
             ) : (
               <Button variant="secondary" size="lg" disabled>
                 Booking Not Available
               </Button>
             )}
           </Col>
-
         </Row>
       </Card>
     </Container>
