@@ -1,18 +1,12 @@
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Container, Row, Col, Form } from "react-bootstrap";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
 import { Toast, ToastContainer } from "react-bootstrap";
 
 import EmailVerification from "../components/EmailVerification";
 import PhoneVerification from "../components/PhoneVerification";
-import StripePayment from "../components/StripePayment";
+import RazorpayPayment from "../components/RazorpayPayment";
 import TicketCounter from "../components/TicketCounter";
-
-const stripePromise = loadStripe(
-  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
-);
 
 const Booking = () => {
   const { state } = useLocation();
@@ -57,7 +51,7 @@ const Booking = () => {
     <>
       <Container
         fluid
-        className="min-vh-100 d-flex align-items-center justify-content-center bg-light"
+        className="min-vh-90 d-flex align-items-center justify-content-center bg-light"
       >
         <div
           className="shadow-lg rounded overflow-hidden"
@@ -150,28 +144,27 @@ const Booking = () => {
                 Date: {tripDate || "—"}
               </p>
 
-              <Elements stripe={stripePromise}>
-                <StripePayment
-                  amount={totalAmount}
-                  disabled={!tripDate || !emailVerified || !phoneVerified}
-                  bookingData={{
-                    bookingType: isCombo ? "combo" : "normal",
-                    placeName: name,
-                    comboDetails: isCombo ? state.combo : null,
-                    userEmail,
-                    userPhone,
-                    adultCount: isCombo ? null : adult,
-                    childCount: isCombo ? null : child,
-                    tripDate,
-                  }}
-                  onSuccess={() =>
-                    showToast("✅ Payment & Booking Successful!", "success")
-                  }
-                  onError={(msg) =>
-                    showToast("❌ Payment failed: " + msg, "error")
-                  }
-                />
-              </Elements>
+              <RazorpayPayment
+                amount={totalAmount}
+                disabled={!tripDate || !emailVerified || !phoneVerified}
+                bookingData={{
+                  bookingType: isCombo ? "combo" : "normal",
+                  placeName: name,
+                  comboDetails: isCombo ? state.combo : null,
+                  userEmail,
+                  userPhone,
+                  adultCount: isCombo ? null : adult,
+                  childCount: isCombo ? null : child,
+                  tripDate,
+                }}
+                onSuccess={() =>
+                  showToast("✅ Payment & Booking Successful!", "success")
+                }
+                onError={(msg) =>
+                  showToast("❌ Payment failed: " + msg, "error")
+                }
+              />
+
             </Col>
 
           </Row>
