@@ -7,22 +7,34 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
   const [sentOtp, setSentOtp] = useState("");
   const [verified, setVerified] = useState(false);
 
-  const sendOtp = () => {
-    if (!email) return alert("Enter email");
-    const gen = Math.floor(1000 + Math.random() * 9000).toString();
-    setSentOtp(gen);
-    alert(`OTP: ${gen}`);
-  };
+  const sendOtp = async () => {
+  if (!email) return alert("Enter email");
 
-  const verifyOtp = () => {
-    if (otp === sentOtp) {
-      setVerified(true);
-      onVerify(true);           // sets emailVerified in parent
-      setParentEmail(email);    // sets userEmail in parent Booking page
-    } else {
-      alert("Wrong OTP");
-    }
-  };
+  await fetch("http://localhost:5000/send-email-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
+  });
+
+  alert("OTP sent to email");
+};
+
+
+  const verifyOtp = async () => {
+  const res = await fetch("http://localhost:5000/verify-email-otp", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, otp })
+  });
+
+  if (res.ok) {
+    setVerified(true);
+    onVerify(true);
+    setParentEmail(email);
+  } else {
+    alert("Invalid OTP");
+  }
+};
 
   return (
     <div>

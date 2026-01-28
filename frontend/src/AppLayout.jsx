@@ -20,15 +20,15 @@ import Details from "./components/Details";
 import Booking from "./pages/Booking";
 import Login from "./pages/Login";
 import Profile from "./pages/profile";
+import MarqueeBar from "./components/MarqueeBar";
 
 // 🔹 Handles navbar switching based on route
 const LayoutContent = () => {
   return (
     <>
-      
       <NavbarR className="sticky-top shadow-sm"/>
+      <MarqueeBar />
       <Routes>
-
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />

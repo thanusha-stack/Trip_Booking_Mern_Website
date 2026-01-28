@@ -1,49 +1,43 @@
-import React from "react";
+import React, { useRef } from "react";
+import emailjs from "@emailjs/browser";
 import {
-  Navbar,
-  Nav,
-  Container,
-  NavDropdown,
-  Button,
-  Row,
-  Col,
-  Card,
-  Form
+  Container, Row, Col, Card, Form, Button
 } from "react-bootstrap";
 
+
 const Contact = () => {
+  const form = useRef();
+
+  const sendEmail = (e) => {
+    e.preventDefault();
+
+    emailjs
+      .sendForm(
+        "service_aky41pr",
+        "template_b2sxtqj",
+        form.current,
+        "OVN4ePYf4s46aWsfn"
+      )
+      .then(
+        () => {
+          alert("Email sent successfully ✅");
+          form.current.reset();
+        },
+        (error) => {
+          alert("Failed to send email ❌");
+          console.log(error.text);
+        }
+      );
+  };
+
   return (
     <>
-      {/* Contact Section */}
       <section className="py-5">
         <Container>
           <Row>
             <Col md={5}>
               <h4 className="fw-bold">Get in Touch</h4>
-              <p>
-                Have questions about tour packages, bookings, or payments?
-                Reach out to us — our team is happy to assist you.
-              </p>
-
-              <p>
-                <strong>Address:</strong>
-                <br />
-                Mysore Tourism Office,
-                <br />
-                Mysuru, Karnataka
-              </p>
-
-              <p>
-                <strong>Phone:</strong>
-                <br />
-                +91 98765 43210
-              </p>
-
-              <p>
-                <strong>Email:</strong>
-                <br />
-                support@mysoretourism.com
-              </p>
+              <p>Have questions? Reach out to us.</p>
             </Col>
 
             <Col md={7}>
@@ -51,28 +45,22 @@ const Contact = () => {
                 <Card.Body>
                   <h5 className="fw-bold mb-3">Send Us a Message</h5>
 
-                  <Form>
+                  <Form ref={form} onSubmit={sendEmail}>
                     <Form.Group className="mb-3">
                       <Form.Label>Full Name</Form.Label>
                       <Form.Control
                         type="text"
-                        placeholder="Enter your name"
+                        name="user_name"
+                        required
                       />
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                      <Form.Label>Email Address</Form.Label>
+                      <Form.Label>Email</Form.Label>
                       <Form.Control
                         type="email"
-                        placeholder="Enter your email"
-                      />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                      <Form.Label>Phone Number</Form.Label>
-                      <Form.Control
-                        type="tel"
-                        placeholder="Enter your phone number"
+                        name="user_email"
+                        required
                       />
                     </Form.Group>
 
@@ -81,26 +69,22 @@ const Contact = () => {
                       <Form.Control
                         as="textarea"
                         rows={4}
-                        placeholder="Write your message here..."
+                        name="message"
+                        required
                       />
                     </Form.Group>
 
-                    <Button variant="success" className="w-100">
+                    <Button type="submit" variant="success" className="w-100">
                       Submit
                     </Button>
                   </Form>
+
                 </Card.Body>
               </Card>
             </Col>
           </Row>
         </Container>
       </section>
-
-      <footer className="bg-dark text-white text-center py-3">
-        <p className="mb-0">
-          © 2025 Mysore Tourism. All Rights Reserved.
-        </p>
-      </footer>
     </>
   );
 };

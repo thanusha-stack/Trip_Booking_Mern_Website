@@ -7,6 +7,11 @@
   pointer-events: none;
 }
 
+.marquee-container {
+  background: transparent;        /* change if needed */
+  padding: 6px 0;
+  font-weight: 500;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {

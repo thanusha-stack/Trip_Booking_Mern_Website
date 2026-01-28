@@ -28,8 +28,8 @@ return (
       <div className="col-md-4 mb-3">
         <h5>Contact</h5>
         <p className="small mb-1">📍 Mysore, Karnataka</p>
-        <p className="small mb-1">📞 +91 98765 43210</p>
-        <p className="small">✉️ support@mysoretourism.com</p>
+        <p className="small mb-1">📞 +91 8248680694</p>
+        <p className="small">✉️ thanusha13062006@gmail.com</p>
       </div>
 
     </div>

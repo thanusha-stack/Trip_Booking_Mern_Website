@@ -15,42 +15,30 @@ function Login() {
 
   // Normal login
   const handleLogin = async () => {
-    try {
       const res = await axios.post(`${API}/login`, form);
        login(res.data.user, res.data.token);
-      alert("Login Successful!");
       navigate("/"); 
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Login failed");
-    }
+    
   };
 
   // Register
   const handleRegister = async () => {
-    try {
+  
       const res = await axios.post(`${API}/register`, form);
-      alert(res.data.message);
       setIsLogin(true);
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Registration failed");
-    }
+  
   };
 
   // Google login
   const handleGoogleLogin = async (credentialResponse) => {
-  try {
+
     const res = await axios.post(`${API}/google-login`, {
       tokenId: credentialResponse.credential, // must match backend
     });
     login(res.data.user, res.data.token);
     alert("Google Login Successful");
     navigate("/");
-  } catch (err) {
-    console.error(err);
-    alert(err.response?.data?.message || "Google login failed");
-  }
+  
 };
 
 
