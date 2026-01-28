@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { Card, Button } from "react-bootstrap";
 import jsPDF from "jspdf";
 
-const Profile = () => {
+const ProfileUp = () => {
   const { user, logout } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -135,4 +135,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfileUp;

@@ -10,7 +10,6 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 import NavbarR from "./components/NavbarR";
-import Welcome from "./components/Welcome";
 
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -19,8 +18,8 @@ import Places from "./pages/Places";
 import Details from "./components/Details";
 import Booking from "./pages/Booking";
 import Login from "./pages/Login";
-import Profile from "./pages/profile";
 import MarqueeBar from "./components/MarqueeBar";
+import ProfileUp from "./pages/ProfileUp";
 
 // 🔹 Handles navbar switching based on route
 const LayoutContent = () => {
@@ -48,7 +47,7 @@ const LayoutContent = () => {
           path="/profile"
           element={
             <ProtectedRoute>
-              <Profile />
+              <ProfileUp />
             </ProtectedRoute>
           }
         />
