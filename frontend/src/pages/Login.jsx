@@ -4,7 +4,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const API = "http://localhost:5000";
+const API = process.env.REACT_APP_API_URL;
 
 function Login() {
   const { login } = useAuth();
