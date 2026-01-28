@@ -108,6 +108,31 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.get("/health", async (req, res) => {
+  try {
+    const state = mongoose.connection.readyState;
+    /*
+      0 = disconnected
+      1 = connected
+      2 = connecting
+      3 = disconnecting
+    */
+
+    res.json({
+      backend: "RUNNING",
+      mongodb:
+        state === 1
+          ? "CONNECTED"
+          : state === 2
+          ? "CONNECTING"
+          : "NOT CONNECTED",
+    });
+  } catch (err) {
+    res.status(500).json({ mongodb: "ERROR" });
+  }
+});
+
+
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
