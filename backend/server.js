@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const Stripe = require("stripe");
 const nodemailer = require("nodemailer");
+const PORT= process.env.PORT || 5000;
 const { OAuth2Client } = require("google-auth-library");
 require("dotenv").config();
 
@@ -42,7 +43,7 @@ const twilioClient = twilio(
 const phoneOtpStore = new Map(); // phone → { otp, expires }
 
 // ===== MONGODB =====
-mongoose.connect("mongodb://127.0.0.1:27017/tripBookingDb")
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB error", err));
 
@@ -230,6 +231,6 @@ app.post("/verify-email-otp", async (req, res) => {
 });
 
 // ===== START SERVER =====
-app.listen(5000, () => {
+app.listen(PORT, () => {
   console.log("🚀 Server running on http://localhost:5000");
 });
