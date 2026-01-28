@@ -4,7 +4,7 @@ const carouselData = [
     title: "1-Day Mysore Explorer",
     description: "Mysore Palace, Zoo, St. Philomena's Church",
     amount: "₹1,200",
-    image: "/assets/images/MysorePalace.jpg",
+    image: "/assets/images/mysore.jpg",
     pick_up: "Mysore bus stand at 6.00 am",
     drop : "Mysore bus stand at 8.00 pm"
   },
