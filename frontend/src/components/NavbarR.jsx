@@ -8,8 +8,10 @@ function NavbarR() {
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg" sticky="top" className="shadow-sm">
+     
       <Container>
         <Navbar.Brand as={NavLink} to="/" className="fw-bold">
+         <i className="bi bi-twitter me-2"></i>
           Mysore <span className="text-primary">Tourism</span>
         </Navbar.Brand>
 
