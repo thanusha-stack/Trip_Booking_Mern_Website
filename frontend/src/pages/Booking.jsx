@@ -51,7 +51,7 @@ const Booking = () => {
     <>
       <Container
         fluid
-        className="min-vh-90 d-flex align-items-center justify-content-center bg-light"
+        className="min-vh-95 d-flex align-items-center justify-content-center bg-light"
       >
         <div
           className="shadow-lg rounded overflow-hidden"

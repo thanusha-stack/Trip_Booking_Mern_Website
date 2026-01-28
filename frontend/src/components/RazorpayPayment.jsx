@@ -9,7 +9,7 @@ const RazorpayPayment = ({
   const handlePayment = async () => {
     try {
       const res = await fetch(
-        "https://mysore-tourism.onrender.com/api/razorpay/create-order",
+        `${process.env.REACT_APP_API_URL}/api/razorpay/create-order`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -30,7 +30,7 @@ const RazorpayPayment = ({
         handler: async function (response) {
           // save booking
           await fetch(
-            "https://mysore-tourism.onrender.com/api/bookings",
+            `${process.env.REACT_APP_API_URL}/api/bookings`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
