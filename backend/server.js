@@ -32,8 +32,13 @@ app.use((req, res, next) => {
 
 // ===== CONSTANTS =====
 const SECRET = process.env.SECRET || "mysore-trip-booking-secret";
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const Razorpay = require("razorpay");
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 // ===== OTP STORE (TEMP) =====
 const otpStore = new Map(); // email → { otp, expires }
@@ -175,6 +180,23 @@ app.post("/google-login", async (req, res) => {
     res.status(500).json({ message: "Google login failed" });
   }
 });
+
+app.post("/api/razorpay/create-order", async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    const order = await razorpay.orders.create({
+      amount: amount * 100, // rupees → paise
+      currency: "INR",
+      receipt: "receipt_" + Date.now(),
+    });
+
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // ===== STRIPE =====
 app.post("/api/payment/create-intent", async (req, res) => {
