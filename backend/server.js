@@ -77,24 +77,21 @@ const Booking = mongoose.model("Booking", {
   createdAt: { type: Date, default: Date.now },
 });
 
-// ===== EMAIL CONFIG (RENDER + GMAIL SAFE) =====
+// ===== EMAIL CONFIG (BREVO - RENDER SAFE) =====
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp-relay.brevo.com",
   port: 587,
   secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Gmail App Password
-  },
-  tls: {
-    rejectUnauthorized: false,
+    user: process.env.BREVO_SMTP_LOGIN,          // always literally "apikey"
+    pass: process.env.BREVO_SMTP_KEY, // SMTP KEY ONLY
   },
 });
 
-// Verify transporter once at startup
+// Verify transporter once
 transporter
   .verify()
-  .then(() => console.log("✅ Email transporter ready"))
+  .then(() => console.log("✅ Email transporter ready (Brevo)"))
   .catch((err) => console.error("❌ Email transporter error:", err));
 
 // ===== ROUTES =====
@@ -213,7 +210,7 @@ app.post("/send-email-otp", async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: `"Trip Booking" <${process.env.EMAIL_USER}>`,
+      from: '"Trip Booking" thanusha13062006@gmail.com',
       to: email,
       subject: "Your OTP",
       text: `Your OTP is ${otp}. It is valid for 5 minutes.`,
