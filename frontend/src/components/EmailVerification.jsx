@@ -4,37 +4,71 @@ import { Form, Button, Row, Col, Badge } from "react-bootstrap";
 const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
-  const [sentOtp, setSentOtp] = useState("");
   const [verified, setVerified] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  const API_URL = process.env.REACT_APP_API_URL;
+
+  // Send OTP
   const sendOtp = async () => {
-  if (!email) return alert("Enter email");
+    if (!email) {
+      alert("Enter email");
+      return;
+    }
 
-  await fetch(`${process.env.REACT_API_URI}/send-email-otp`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email })
-  });
+    try {
+      setLoading(true);
 
-  alert("OTP sent to email");
-};
+      const res = await fetch(`${API_URL}/send-email-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
+      if (!res.ok) {
+        throw new Error("Failed to send OTP");
+      }
 
+      alert("OTP sent to email");
+    } catch (err) {
+      alert("Error sending OTP");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Verify OTP
   const verifyOtp = async () => {
-  const res = await fetch(`${process.env.REACT_APP_API_URL}/verify-email-otp`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, otp })
-  });
+    if (!otp) {
+      alert("Enter OTP");
+      return;
+    }
 
-  if (res.ok) {
-    setVerified(true);
-    onVerify(true);
-    setParentEmail(email);
-  } else {
-    alert("Invalid OTP");
-  }
-};
+    try {
+      setLoading(true);
+
+      const res = await fetch(`${API_URL}/verify-email-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Invalid OTP");
+      }
+
+      setVerified(true);
+      onVerify(true);
+      setParentEmail(email);
+      alert("Email verified successfully");
+    } catch (err) {
+      alert("Invalid OTP");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -56,8 +90,13 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
               />
             </Col>
             <Col md={4}>
-              <Button size="sm" className="w-100" onClick={sendOtp}>
-                Send OTP
+              <Button
+                size="sm"
+                className="w-100"
+                onClick={sendOtp}
+                disabled={loading}
+              >
+                {loading ? "Sending..." : "Send OTP"}
               </Button>
             </Col>
           </Row>
@@ -77,8 +116,9 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
                 variant="success"
                 className="w-100"
                 onClick={verifyOtp}
+                disabled={loading}
               >
-                Verify
+                {loading ? "Verifying..." : "Verify"}
               </Button>
             </Col>
           </Row>
