@@ -10,7 +10,7 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
   const sendOtp = async () => {
   if (!email) return alert("Enter email");
 
-  await fetch("http://localhost:5000/send-email-otp", {
+  await fetch(`${process.env.REACT_API_URI}/send-email-otp`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email })
@@ -21,7 +21,7 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
 
 
   const verifyOtp = async () => {
-  const res = await fetch("http://localhost:5000/verify-email-otp", {
+  const res = await fetch(`${process.env.REACT_APP_API_URL}/verify-email-otp`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, otp })
