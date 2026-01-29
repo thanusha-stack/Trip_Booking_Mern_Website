@@ -267,7 +267,6 @@ app.post("/send-email-otp", async (req, res) => {
     const { email } = req.body;
     
     console.log("📧 OTP request for:", email);
-    console.log("Environment:", process.env.NODE_ENV);
 
     if (!email) {
       return res.status(400).json({ 
@@ -276,13 +275,11 @@ app.post("/send-email-otp", async (req, res) => {
       });
     }
 
-    // Check if email transporter is configured
     if (!transporter) {
       console.error("❌ Email transporter not configured");
       return res.status(500).json({
         success: false,
-        message: "Email service not configured. Check server logs.",
-        debug: "Transporter not initialized. Check BREVO credentials."
+        message: "Email service not configured"
       });
     }
 
@@ -294,15 +291,32 @@ app.post("/send-email-otp", async (req, res) => {
       expires: Date.now() + 5 * 60 * 1000,
     });
 
-    console.log("📤 Sending OTP email...");
+    console.log("📤 Sending OTP email via Brevo...");
 
-    // IMPORTANT: Use a verified sender email
+    // CRITICAL: Use your VERIFIED sender from Brevo dashboard
     const mailOptions = {
-      from: '"Trip Booking" <noreply@tripbooking.com>', // CHANGE THIS to your verified Brevo sender
+      from: '"Mysoe Tourism" <thanusha13062006@gmail.com>', // Your verified sender
       to: email,
-      subject: "Your OTP Verification Code",
+      subject: "Your OTP Verification Code - Mysoe Tourism",
       text: `Your OTP is ${otp}. It is valid for 5 minutes.`,
-      html: `<p>Your OTP is <b>${otp}</b>. It is valid for 5 minutes.</p>`
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #4CAF50;">Mysoe Tourism OTP Verification</h2>
+          <p>Hello,</p>
+          <p>Your One-Time Password for verification is:</p>
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; margin: 20px 0; font-size: 24px; font-weight: bold; letter-spacing: 5px;">
+            ${otp}
+          </div>
+          <p>This code will expire in <strong>5 minutes</strong>.</p>
+          <p>If you didn't request this OTP, please ignore this email.</p>
+          <hr style="margin: 30px 0;">
+          <p style="color: #666; font-size: 12px;">
+            Best regards,<br>
+            Mysoe Tourism Team<br>
+            thanusha13062006@gmail.com
+          </p>
+        </div>
+      `
     };
 
     const info = await transporter.sendMail(mailOptions);
@@ -315,16 +329,20 @@ app.post("/send-email-otp", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ OTP Error Details:");
-    console.error("- Message:", err.message);
-    console.error("- Code:", err.code);
-    console.error("- Response:", err.response);
+    console.error("❌ OTP Error:", err.message);
+    
+    // More specific error messages
+    let userMessage = "OTP send failed";
+    if (err.code === 'EAUTH') {
+      userMessage = "Email authentication failed. Check Brevo credentials.";
+    } else if (err.code === 'EENVELOPE') {
+      userMessage = "Invalid email address.";
+    }
     
     res.status(500).json({ 
       success: false, 
-      message: "OTP send failed",
-      error: err.message,
-      code: err.code
+      message: userMessage,
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
 });
