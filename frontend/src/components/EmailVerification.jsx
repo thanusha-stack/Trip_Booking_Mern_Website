@@ -6,6 +6,7 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
   const [otp, setOtp] = useState("");
   const [verified, setVerified] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
 
   const API_URL = process.env.REACT_APP_API_URL;
 
@@ -21,6 +22,8 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
       });
 
       if (!res.ok) throw new Error();
+
+      setOtpSent(true);
       alert("OTP sent to email");
     } catch {
       alert("Failed to send OTP");
@@ -56,7 +59,8 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
   return (
     <div>
       <Form.Label className="small fw-semibold mb-1">
-        Email Verification {verified && <Badge bg="success">Verified</Badge>}
+        Email Verification{" "}
+        {verified && <Badge bg="success">Verified</Badge>}
       </Form.Label>
 
       {!verified && (
@@ -68,12 +72,17 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
                 type="email"
                 placeholder="Email"
                 value={email}
+                disabled={otpSent}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </Col>
             <Col md={4}>
-              <Button size="sm" onClick={sendOtp} disabled={loading}>
-                Send OTP
+              <Button
+                size="sm"
+                onClick={sendOtp}
+                disabled={loading || otpSent}
+              >
+                {otpSent ? "Sent" : "Send OTP"}
               </Button>
             </Col>
           </Row>
