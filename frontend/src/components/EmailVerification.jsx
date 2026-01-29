@@ -9,62 +9,45 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
 
   const API_URL = process.env.REACT_APP_API_URL;
 
-  // Send OTP
   const sendOtp = async () => {
-    if (!email) {
-      alert("Enter email");
-      return;
-    }
+    if (!email) return alert("Enter email");
 
     try {
       setLoading(true);
-
       const res = await fetch(`${API_URL}/send-email-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to send OTP");
-      }
-
+      if (!res.ok) throw new Error();
       alert("OTP sent to email");
-    } catch (err) {
-      alert("Error sending OTP");
-      console.error(err);
+    } catch {
+      alert("Failed to send OTP");
     } finally {
       setLoading(false);
     }
   };
 
-  // Verify OTP
   const verifyOtp = async () => {
-    if (!otp) {
-      alert("Enter OTP");
-      return;
-    }
+    if (!otp) return alert("Enter OTP");
 
     try {
       setLoading(true);
-
       const res = await fetch(`${API_URL}/verify-email-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp }),
       });
 
-      if (!res.ok) {
-        throw new Error("Invalid OTP");
-      }
+      if (!res.ok) throw new Error();
 
       setVerified(true);
       onVerify(true);
       setParentEmail(email);
-      alert("Email verified successfully");
-    } catch (err) {
+      alert("Email verified");
+    } catch {
       alert("Invalid OTP");
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -73,8 +56,7 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
   return (
     <div>
       <Form.Label className="small fw-semibold mb-1">
-        Email Verification{" "}
-        {verified && <Badge bg="success">Verified</Badge>}
+        Email Verification {verified && <Badge bg="success">Verified</Badge>}
       </Form.Label>
 
       {!verified && (
@@ -90,13 +72,8 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
               />
             </Col>
             <Col md={4}>
-              <Button
-                size="sm"
-                className="w-100"
-                onClick={sendOtp}
-                disabled={loading}
-              >
-                {loading ? "Sending..." : "Send OTP"}
+              <Button size="sm" onClick={sendOtp} disabled={loading}>
+                Send OTP
               </Button>
             </Col>
           </Row>
@@ -114,11 +91,10 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
               <Button
                 size="sm"
                 variant="success"
-                className="w-100"
                 onClick={verifyOtp}
                 disabled={loading}
               >
-                {loading ? "Verifying..." : "Verify"}
+                Verify
               </Button>
             </Col>
           </Row>
