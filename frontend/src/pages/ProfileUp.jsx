@@ -14,7 +14,7 @@ const ProfileUp = () => {
     const fetchBookings = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/bookings?userEmail=${user.email}`
+          `${process.env.REACT_APP_API_URL}/api/bookings?userEmail=${user.email}`
         );
         if (!res.ok) throw new Error("Failed to fetch bookings");
         const data = await res.json();
