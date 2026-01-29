@@ -7,11 +7,17 @@ const cors = require("cors");
 const nodemailer = require("nodemailer");
 const Razorpay = require("razorpay");
 const { OAuth2Client } = require("google-auth-library");
+
+// Load environment variables FIRST
 require("dotenv").config();
 
 // ===== APP CONFIG =====
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Log environment for debugging
+console.log("🚀 Environment:", process.env.NODE_ENV || "development");
+console.log("📧 Email configured:", !!(process.env.BREVO_SMTP_LOGIN && process.env.BREVO_SMTP_KEY));
 
 app.use(express.json());
 
@@ -44,11 +50,14 @@ const razorpay = new Razorpay({
 });
 
 // ===== OTP STORE =====
-const otpStore = new Map(); // email -> { otp, expires }
+const otpStore = new Map();
 
 // ===== MONGODB =====
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB error:", err));
 
@@ -77,26 +86,73 @@ const Booking = mongoose.model("Booking", {
   createdAt: { type: Date, default: Date.now },
 });
 
-// ===== EMAIL CONFIG (BREVO - RENDER SAFE) =====
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.BREVO_SMTP_LOGIN,          // always literally "apikey"
-    pass: process.env.BREVO_SMTP_KEY, // SMTP KEY ONLY
-  },
+// ===== EMAIL CONFIG (PRODUCTION READY) =====
+let transporter;
+
+// Function to create transporter with fallback
+const createTransporter = () => {
+  console.log("📧 Configuring email transporter...");
+  
+  // Check if we have Brevo credentials
+  if (process.env.BREVO_SMTP_LOGIN && process.env.BREVO_SMTP_KEY) {
+    console.log("📧 Using Brevo SMTP");
+    return nodemailer.createTransport({
+      host: "smtp.brevo.com",  // Changed from smtp-relay.brevo.com
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.BREVO_SMTP_LOGIN,
+        pass: process.env.BREVO_SMTP_KEY,
+      },
+      tls: {
+        rejectUnauthorized: false  // Allow self-signed certificates
+      }
+    });
+  } else {
+    console.log("⚠️ Brevo credentials missing, email will not work");
+    return null;
+  }
+};
+
+// Initialize transporter
+transporter = createTransporter();
+
+// Verify transporter
+if (transporter) {
+  transporter.verify()
+    .then(() => console.log("✅ Email transporter ready"))
+    .catch((err) => {
+      console.error("❌ Email transporter error:", err.message);
+      console.error("Check BREVO_SMTP_LOGIN and BREVO_SMTP_KEY in Render environment variables");
+    });
+}
+
+// ===== HEALTH CHECK ENDPOINTS =====
+app.get("/", (req, res) => {
+  res.json({ 
+    message: "🚀 Server is running!",
+    environment: process.env.NODE_ENV || "development",
+    timestamp: new Date().toISOString()
+  });
 });
 
-// Verify transporter once
-transporter
-  .verify()
-  .then(() => console.log("✅ Email transporter ready (Brevo)"))
-  .catch((err) => console.error("❌ Email transporter error:", err));
+app.get("/health", (req, res) => {
+  res.json({
+    status: "healthy",
+    email: transporter ? "configured" : "not configured",
+    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    timestamp: new Date().toISOString()
+  });
+});
 
-// ===== ROUTES =====
-app.get("/", (req, res) => {
-  res.send("🚀 Server is running!");
+app.get("/env-check", (req, res) => {
+  res.json({
+    environment: process.env.NODE_ENV || "development",
+    hasBrevoLogin: !!process.env.BREVO_SMTP_LOGIN,
+    hasBrevoKey: !!process.env.BREVO_SMTP_KEY,
+    hasMongoUri: !!process.env.MONGO_URI,
+    port: process.env.PORT || 5000
+  });
 });
 
 // ===== AUTH =====
@@ -114,6 +170,7 @@ app.post("/register", async (req, res) => {
     const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: "1h" });
     res.json({ token, user });
   } catch (err) {
+    console.error("Register error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -133,6 +190,7 @@ app.post("/login", async (req, res) => {
     const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: "1h" });
     res.json({ token, user });
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -175,31 +233,58 @@ app.post("/api/razorpay/create-order", async (req, res) => {
 
     res.json(order);
   } catch (err) {
+    console.error("Razorpay error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
 // ===== BOOKINGS =====
 app.get("/api/bookings", async (req, res) => {
-  const { userEmail } = req.query;
-  const filter = userEmail ? { userEmail } : {};
-  const bookings = await Booking.find(filter).sort({ createdAt: -1 });
-  res.json({ bookings });
+  try {
+    const { userEmail } = req.query;
+    const filter = userEmail ? { userEmail } : {};
+    const bookings = await Booking.find(filter).sort({ createdAt: -1 });
+    res.json({ bookings });
+  } catch (err) {
+    console.error("Bookings error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 app.post("/api/bookings", async (req, res) => {
-  const booking = await Booking.create(req.body);
-  res.json({ booking });
+  try {
+    const booking = await Booking.create(req.body);
+    res.json({ booking });
+  } catch (err) {
+    console.error("Create booking error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// ===== EMAIL OTP =====
+// ===== EMAIL OTP (FIXED VERSION) =====
 app.post("/send-email-otp", async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email)
-      return res.status(400).json({ success: false, message: "Email required" });
+    
+    console.log("📧 OTP request for:", email);
+    console.log("Environment:", process.env.NODE_ENV);
 
-    console.log("📧 Sending OTP to:", email);
+    if (!email) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Email required" 
+      });
+    }
+
+    // Check if email transporter is configured
+    if (!transporter) {
+      console.error("❌ Email transporter not configured");
+      return res.status(500).json({
+        success: false,
+        message: "Email service not configured. Check server logs.",
+        debug: "Transporter not initialized. Check BREVO credentials."
+      });
+    }
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     const hashedOtp = await bcrypt.hash(otp, 10);
@@ -209,17 +294,38 @@ app.post("/send-email-otp", async (req, res) => {
       expires: Date.now() + 5 * 60 * 1000,
     });
 
-    await transporter.sendMail({
-      from: '"Trip Booking" thanusha13062006@gmail.com',
+    console.log("📤 Sending OTP email...");
+
+    // IMPORTANT: Use a verified sender email
+    const mailOptions = {
+      from: '"Trip Booking" <noreply@tripbooking.com>', // CHANGE THIS to your verified Brevo sender
       to: email,
-      subject: "Your OTP",
+      subject: "Your OTP Verification Code",
       text: `Your OTP is ${otp}. It is valid for 5 minutes.`,
+      html: `<p>Your OTP is <b>${otp}</b>. It is valid for 5 minutes.</p>`
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    
+    console.log("✅ Email sent successfully:", info.messageId);
+    
+    res.json({ 
+      success: true,
+      message: "OTP sent successfully"
     });
 
-    res.json({ success: true });
   } catch (err) {
-    console.error("❌ OTP error:", err);
-    res.status(500).json({ success: false, message: "OTP send failed" });
+    console.error("❌ OTP Error Details:");
+    console.error("- Message:", err.message);
+    console.error("- Code:", err.code);
+    console.error("- Response:", err.response);
+    
+    res.status(500).json({ 
+      success: false, 
+      message: "OTP send failed",
+      error: err.message,
+      code: err.code
+    });
   }
 });
 
@@ -229,7 +335,7 @@ app.post("/verify-email-otp", async (req, res) => {
     const record = otpStore.get(email);
 
     if (!record)
-      return res.status(400).json({ success: false, message: "OTP not found" });
+      return res.status(400).json({ success: false, message: "OTP not found or expired" });
 
     if (Date.now() > record.expires)
       return res.status(400).json({ success: false, message: "OTP expired" });
@@ -241,11 +347,13 @@ app.post("/verify-email-otp", async (req, res) => {
     otpStore.delete(email);
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false });
+    console.error("Verify OTP error:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
 // ===== START SERVER =====
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
