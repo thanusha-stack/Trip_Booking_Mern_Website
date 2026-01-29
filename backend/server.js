@@ -6,20 +6,23 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const Stripe = require("stripe");
 const nodemailer = require("nodemailer");
-const PORT= process.env.PORT || 5000;
+const Razorpay = require("razorpay");
 const { OAuth2Client } = require("google-auth-library");
 require("dotenv").config();
 
 // ===== APP CONFIG =====
 const app = express();
+const PORT = process.env.PORT || 5000;
+
 app.use(express.json());
 
 app.use(
   cors({
     origin: [
-    "http://localhost:3000",
-    "https://mysore-tourism.onrender.com"
-  ],
+      "http://localhost:3000",
+      "https://mysore-tourism.onrender.com",
+      "https://trip-booking-mern-website.onrender.com",
+    ],
     credentials: true,
   })
 );
@@ -33,25 +36,22 @@ app.use((req, res, next) => {
 // ===== CONSTANTS =====
 const SECRET = process.env.SECRET || "mysore-trip-booking-secret";
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const Razorpay = require("razorpay");
 
+// ===== STRIPE (FIXED) =====
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// ===== RAZORPAY =====
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// ===== OTP STORE (TEMP) =====
+// ===== OTP STORES =====
 const otpStore = new Map(); // email → { otp, expires }
-const twilio = require("twilio"); //phone verification
-const twilioClient = twilio(
-  process.env.TWILIO_SID,
-  process.env.TWILIO_AUTH
-);
-
-const phoneOtpStore = new Map(); // phone → { otp, expires }
 
 // ===== MONGODB =====
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB error", err));
 
@@ -80,13 +80,21 @@ const Booking = mongoose.model("Booking", {
   createdAt: { type: Date, default: Date.now },
 });
 
-// ===== EMAIL CONFIG =====
+// ===== EMAIL CONFIG (FIXED + DEBUG) =====
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Gmail App Password
+    pass: process.env.EMAIL_PASS, // 16-char Gmail App Password
   },
+});
+
+transporter.verify((err) => {
+  if (err) {
+    console.error("❌ Email transporter error:", err);
+  } else {
+    console.log("✅ Email transporter ready");
+  }
 });
 
 // ===== ROUTES =====
@@ -107,36 +115,11 @@ app.post("/register", async (req, res) => {
     const user = await User.create({ name, email, password: hashed });
 
     const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: "1h" });
-    res.json({ message: "Registered successfully", token, user });
+    res.json({ token, user });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
-app.get("/health", async (req, res) => {
-  try {
-    const state = mongoose.connection.readyState;
-    /*
-      0 = disconnected
-      1 = connected
-      2 = connecting
-      3 = disconnecting
-    */
-
-    res.json({
-      backend: "RUNNING",
-      mongodb:
-        state === 1
-          ? "CONNECTED"
-          : state === 2
-          ? "CONNECTING"
-          : "NOT CONNECTED",
-    });
-  } catch (err) {
-    res.status(500).json({ mongodb: "ERROR" });
-  }
-});
-
 
 app.post("/login", async (req, res) => {
   try {
@@ -176,17 +159,18 @@ app.post("/google-login", async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: "1h" });
     res.json({ token, user });
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: "Google login failed" });
   }
 });
 
+// ===== RAZORPAY ORDER =====
 app.post("/api/razorpay/create-order", async (req, res) => {
   try {
     const { amount } = req.body;
 
     const order = await razorpay.orders.create({
-      amount: amount * 100, // rupees → paise
+      amount: amount * 100,
       currency: "INR",
       receipt: "receipt_" + Date.now(),
     });
@@ -197,8 +181,7 @@ app.post("/api/razorpay/create-order", async (req, res) => {
   }
 });
 
-
-// ===== STRIPE =====
+// ===== STRIPE PAYMENT =====
 app.post("/api/payment/create-intent", async (req, res) => {
   try {
     const { amount } = req.body;
@@ -206,7 +189,6 @@ app.post("/api/payment/create-intent", async (req, res) => {
     const intent = await stripe.paymentIntents.create({
       amount: amount * 100,
       currency: "inr",
-      payment_method_types: ["card"],
     });
 
     res.json({ clientSecret: intent.client_secret });
@@ -217,23 +199,15 @@ app.post("/api/payment/create-intent", async (req, res) => {
 
 // ===== BOOKINGS =====
 app.get("/api/bookings", async (req, res) => {
-  try {
-    const { userEmail } = req.query;
-    const filter = userEmail ? { userEmail } : {};
-    const bookings = await Booking.find(filter).sort({ createdAt: -1 });
-    res.json({ bookings });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  const { userEmail } = req.query;
+  const filter = userEmail ? { userEmail } : {};
+  const bookings = await Booking.find(filter).sort({ createdAt: -1 });
+  res.json({ bookings });
 });
 
 app.post("/api/bookings", async (req, res) => {
-  try {
-    const booking = await Booking.create(req.body);
-    res.json({ message: "Booking saved", booking });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  const booking = await Booking.create(req.body);
+  res.json({ booking });
 });
 
 // ===== EMAIL OTP =====
@@ -259,6 +233,7 @@ app.post("/send-email-otp", async (req, res) => {
 
     res.json({ success: true });
   } catch (err) {
+    console.error("OTP error:", err);
     res.status(500).json({ success: false, message: "OTP send failed" });
   }
 });
@@ -268,7 +243,6 @@ app.post("/verify-email-otp", async (req, res) => {
   const record = otpStore.get(email);
 
   if (!record) return res.status(400).json({ success: false });
-
   if (Date.now() > record.expires)
     return res.status(400).json({ success: false, message: "OTP expired" });
 
@@ -282,5 +256,5 @@ app.post("/verify-email-otp", async (req, res) => {
 
 // ===== START SERVER =====
 app.listen(PORT, () => {
-  console.log("🚀 Server running on http://localhost:5000");
+  console.log(`🚀 Server running on port ${PORT}`);
 });
