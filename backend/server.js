@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-const Stripe = require("stripe");
 const nodemailer = require("nodemailer");
 const Razorpay = require("razorpay");
 const { OAuth2Client } = require("google-auth-library");
@@ -37,8 +36,6 @@ app.use((req, res, next) => {
 const SECRET = process.env.SECRET || "mysore-trip-booking-secret";
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// ===== STRIPE (FIXED) =====
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ===== RAZORPAY =====
 const razorpay = new Razorpay({
@@ -176,22 +173,6 @@ app.post("/api/razorpay/create-order", async (req, res) => {
     });
 
     res.json(order);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ===== STRIPE PAYMENT =====
-app.post("/api/payment/create-intent", async (req, res) => {
-  try {
-    const { amount } = req.body;
-
-    const intent = await stripe.paymentIntents.create({
-      amount: amount * 100,
-      currency: "inr",
-    });
-
-    res.json({ clientSecret: intent.client_secret });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
