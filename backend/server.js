@@ -26,6 +26,7 @@ app.use(
   })
 );
 
+// ===== HEADERS (Google Login Fix) =====
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
@@ -36,21 +37,20 @@ app.use((req, res, next) => {
 const SECRET = process.env.SECRET || "mysore-trip-booking-secret";
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-
 // ===== RAZORPAY =====
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// ===== OTP STORES =====
-const otpStore = new Map(); // email → { otp, expires }
+// ===== OTP STORE =====
+const otpStore = new Map(); // email -> { otp, expires }
 
 // ===== MONGODB =====
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB error", err));
+  .catch((err) => console.error("❌ MongoDB error:", err));
 
 // ===== MODELS =====
 const User = mongoose.model("User", {
@@ -77,26 +77,29 @@ const Booking = mongoose.model("Booking", {
   createdAt: { type: Date, default: Date.now },
 });
 
-// ===== EMAIL CONFIG (FIXED + DEBUG) =====
+// ===== EMAIL CONFIG (RENDER + GMAIL SAFE) =====
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // 16-char Gmail App Password
+    pass: process.env.EMAIL_PASS, // Gmail App Password
+  },
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 
-transporter.verify((err) => {
-  if (err) {
-    console.error("❌ Email transporter error:", err);
-  } else {
-    console.log("✅ Email transporter ready");
-  }
-});
+// Verify transporter once at startup
+transporter
+  .verify()
+  .then(() => console.log("✅ Email transporter ready"))
+  .catch((err) => console.error("❌ Email transporter error:", err));
 
 // ===== ROUTES =====
 app.get("/", (req, res) => {
-  res.send("Server is running!");
+  res.send("🚀 Server is running!");
 });
 
 // ===== AUTH =====
@@ -156,7 +159,8 @@ app.post("/google-login", async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: "1h" });
     res.json({ token, user });
-  } catch {
+  } catch (err) {
+    console.error("Google login error:", err);
     res.status(500).json({ message: "Google login failed" });
   }
 });
@@ -195,7 +199,10 @@ app.post("/api/bookings", async (req, res) => {
 app.post("/send-email-otp", async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ success: false });
+    if (!email)
+      return res.status(400).json({ success: false, message: "Email required" });
+
+    console.log("📧 Sending OTP to:", email);
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     const hashedOtp = await bcrypt.hash(otp, 10);
@@ -206,33 +213,39 @@ app.post("/send-email-otp", async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: `"Booking App" <${process.env.EMAIL_USER}>`,
+      from: `"Trip Booking" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Your OTP",
-      text: `Your OTP is ${otp}`,
+      text: `Your OTP is ${otp}. It is valid for 5 minutes.`,
     });
 
     res.json({ success: true });
   } catch (err) {
-    console.error("OTP error:", err);
+    console.error("❌ OTP error:", err);
     res.status(500).json({ success: false, message: "OTP send failed" });
   }
 });
 
 app.post("/verify-email-otp", async (req, res) => {
-  const { email, otp } = req.body;
-  const record = otpStore.get(email);
+  try {
+    const { email, otp } = req.body;
+    const record = otpStore.get(email);
 
-  if (!record) return res.status(400).json({ success: false });
-  if (Date.now() > record.expires)
-    return res.status(400).json({ success: false, message: "OTP expired" });
+    if (!record)
+      return res.status(400).json({ success: false, message: "OTP not found" });
 
-  const isMatch = await bcrypt.compare(otp, record.otp);
-  if (!isMatch)
-    return res.status(400).json({ success: false, message: "Wrong OTP" });
+    if (Date.now() > record.expires)
+      return res.status(400).json({ success: false, message: "OTP expired" });
 
-  otpStore.delete(email);
-  res.json({ success: true });
+    const isMatch = await bcrypt.compare(otp, record.otp);
+    if (!isMatch)
+      return res.status(400).json({ success: false, message: "Wrong OTP" });
+
+    otpStore.delete(email);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false });
+  }
 });
 
 // ===== START SERVER =====
