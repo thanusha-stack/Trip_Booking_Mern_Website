@@ -146,7 +146,7 @@ const Booking = () => {
 
               <RazorpayPayment
                 amount={totalAmount}
-                disabled={!tripDate || !emailVerified || !phoneVerified}
+                disabled={!tripDate}
                 bookingData={{
                   bookingType: isCombo ? "combo" : "normal",
                   placeName: name,
