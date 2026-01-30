@@ -1,3 +1,5 @@
+import { sendReceiptEmail } from "../utils/sendReceiptEmail";
+
 const RazorpayPayment = ({
   amount,
   disabled,
@@ -5,7 +7,6 @@ const RazorpayPayment = ({
   onSuccess,
   onError,
 }) => {
-
   const handlePayment = async () => {
     try {
       const res = await fetch(
@@ -23,15 +24,13 @@ const RazorpayPayment = ({
         key: process.env.REACT_APP_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: "INR",
-        name: "TripBooking",
+        name: "Mysore Tourism",
         description: bookingData.placeName,
         order_id: order.id,
 
         handler: async function (response) {
-          // save booking
-          await fetch(
-            `${process.env.REACT_APP_API_URL}/api/bookings`,
-            {
+          try {
+            await fetch(`${process.env.REACT_APP_API_URL}/api/bookings`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -45,10 +44,22 @@ const RazorpayPayment = ({
                 emailVerified: true,
                 phoneVerified: true,
               }),
-            }
-          );
+            });
 
-          onSuccess();
+            await sendReceiptEmail({
+              email: bookingData.userEmail,    
+              name: bookingData.placeName,       
+              receiptId: bookingData.receiptId,
+              placeName: bookingData.placeName,
+              totalAmount: amount,
+              tripDate: bookingData.tripDate,
+            });
+
+            onSuccess();
+          } catch (err) {
+            console.error("Post-payment error:", err);
+            onError("Payment succeeded, but email failed");
+          }
         },
 
         prefill: {
@@ -62,7 +73,7 @@ const RazorpayPayment = ({
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
-      onError(err.message);
+      onError(err.message || "Payment failed");
     }
   };
 

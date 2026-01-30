@@ -1,7 +1,6 @@
 import { useLocation } from "react-router-dom";
-import { useState } from "react";
-import { Container, Row, Col, Form } from "react-bootstrap";
-import { Toast, ToastContainer } from "react-bootstrap";
+import { useState, useRef } from "react";
+import { Container, Row, Col, Form, Toast, ToastContainer } from "react-bootstrap";
 
 import EmailVerification from "../components/EmailVerification";
 import PhoneVerification from "../components/PhoneVerification";
@@ -10,6 +9,7 @@ import TicketCounter from "../components/TicketCounter";
 
 const Booking = () => {
   const { state } = useLocation();
+  const receiptIdRef = useRef(`MYT-${Date.now()}`);
 
   const [members, setMembers] = useState(1);
   const [userEmail, setUserEmail] = useState("");
@@ -26,15 +26,13 @@ const Booking = () => {
     type: "success",
   });
 
-  if (!state)
+  /* ✅ conditional return AFTER hooks */
+  if (!state) {
     return <div className="text-center mt-5">No booking data</div>;
-
-  /* 🔹 Generate receipt ID once (IMPORTANT) */
-  const receiptId = `MYT-${Date.now()}`;
+  }
 
   /* 🔹 Detect combo booking */
   const isCombo = !!state.combo;
-
   const name = isCombo ? state.combo.title : state.name;
 
   const comboAmount = isCombo
@@ -64,7 +62,7 @@ const Booking = () => {
           style={{ width: "1100px", maxWidth: "95%" }}
         >
           <Row className="g-0">
-            {/* LEFT SECTION */}
+            {/* LEFT */}
             <Col md={7} className="p-4 bg-white">
               <h5 className="fw-bold">Checkout</h5>
               <p className="text-muted small">
@@ -76,12 +74,12 @@ const Booking = () => {
                 <Form.Control
                   size="sm"
                   type="date"
+                  min={new Date().toISOString().split("T")[0]}
                   value={tripDate}
                   onChange={(e) => setTripDate(e.target.value)}
                 />
               </Form.Group>
 
-              {/* Ticket selection (normal trips only) */}
               {!isCombo && (
                 <Row className="mb-3">
                   <Col>
@@ -119,7 +117,7 @@ const Booking = () => {
               </div>
             </Col>
 
-            {/* RIGHT SECTION */}
+            {/* RIGHT */}
             <Col
               md={5}
               className="p-4 text-white"
@@ -152,9 +150,14 @@ const Booking = () => {
 
               <RazorpayPayment
                 amount={totalAmount}
-                disabled={!tripDate || !emailVerified || !phoneVerified}
+                disabled={
+                  !tripDate ||
+                  totalAmount <= 0 ||
+                  !emailVerified ||
+                  !phoneVerified
+                }
                 bookingData={{
-                  receiptId,
+                  receiptId: receiptIdRef.current,
                   bookingType: isCombo ? "combo" : "normal",
                   placeName: name,
                   comboDetails: isCombo ? state.combo : null,
@@ -176,13 +179,10 @@ const Booking = () => {
         </div>
       </Container>
 
-      {/* TOAST */}
       <ToastContainer position="top-end" className="p-3">
         <Toast
           show={toast.show}
           bg={toast.type === "success" ? "success" : "danger"}
-          onClose={() => setToast({ ...toast, show: false })}
-          delay={4000}
           autohide
         >
           <Toast.Body className="text-white">
