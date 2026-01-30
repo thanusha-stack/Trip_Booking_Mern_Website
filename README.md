@@ -80,11 +80,11 @@ This project is built as a **real-world booking system** suitable for portfolios
   <img src="./Screenshots/payment.png" width="45%" />
 </p>
 <p align="center">
-  <img src="./Screenshots/razorpayment.png" width="45%" />
+  <img src="./Screenshots/razorpayPayment.png.png" width="45%" />
 </p>
 
 <p align="center">
-  <img src="./Screenshots/profile.png" width="45%" />
+  <img src="./Screenshots/profile.png.png" width="45%" />
 </p>
 ---
 
