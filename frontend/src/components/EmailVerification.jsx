@@ -1,58 +1,48 @@
 import { useState } from "react";
 import { Form, Button, Row, Col, Badge } from "react-bootstrap";
+import emailjs from "emailjs-com";
 
 const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
+  const [generatedOtp, setGeneratedOtp] = useState("");
   const [verified, setVerified] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
-
-  const API_URL = process.env.REACT_APP_API_URL;
+  const [loading, setLoading] = useState(false);
 
   const sendOtp = async () => {
     if (!email) return alert("Enter email");
 
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_URL}/send-email-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+    const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
+    setGeneratedOtp(otpCode);
 
-      if (!res.ok) throw new Error();
+    setLoading(true);
+    try {
+      await emailjs.send(
+        process.env.REACT_APP_EMAILJS_SERVICE_ID,
+        process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
+        { email, otp: otpCode },
+        process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+      );
 
       setOtpSent(true);
       alert("OTP sent to email");
-    } catch {
+    } catch (err) {
       alert("Failed to send OTP");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const verifyOtp = async () => {
-    if (!otp) return alert("Enter OTP");
-
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_URL}/verify-email-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp }),
-      });
-
-      if (!res.ok) throw new Error();
-
+  const verifyOtp = () => {
+    if (otp === generatedOtp) {
       setVerified(true);
       onVerify(true);
       setParentEmail(email);
       alert("Email verified");
-    } catch {
+    } else {
       alert("Invalid OTP");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -77,11 +67,7 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
               />
             </Col>
             <Col md={4}>
-              <Button
-                size="sm"
-                onClick={sendOtp}
-                disabled={loading || otpSent}
-              >
+              <Button size="sm" onClick={sendOtp} disabled={loading || otpSent}>
                 {otpSent ? "Sent" : "Send OTP"}
               </Button>
             </Col>
@@ -97,12 +83,7 @@ const EmailVerification = ({ onVerify, setEmail: setParentEmail }) => {
               />
             </Col>
             <Col md={4}>
-              <Button
-                size="sm"
-                variant="success"
-                onClick={verifyOtp}
-                disabled={loading}
-              >
+              <Button size="sm" variant="success" onClick={verifyOtp}>
                 Verify
               </Button>
             </Col>
