@@ -11,4 +11,4 @@ const MarqueeBar = () => {
   );
 };
 
-export default MarqueeBar;
+export default MarqueeBar;  
