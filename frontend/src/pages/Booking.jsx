@@ -10,6 +10,7 @@ import TicketCounter from "../components/TicketCounter";
 
 const Booking = () => {
   const { state } = useLocation();
+
   const [members, setMembers] = useState(1);
   const [userEmail, setUserEmail] = useState("");
   const [userPhone, setUserPhone] = useState("");
@@ -18,6 +19,7 @@ const Booking = () => {
   const [tripDate, setTripDate] = useState("");
   const [emailVerified, setEmailVerified] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
+
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -27,10 +29,14 @@ const Booking = () => {
   if (!state)
     return <div className="text-center mt-5">No booking data</div>;
 
+  /* 🔹 Generate receipt ID once (IMPORTANT) */
+  const receiptId = `MYT-${Date.now()}`;
+
   /* 🔹 Detect combo booking */
   const isCombo = !!state.combo;
 
   const name = isCombo ? state.combo.title : state.name;
+
   const comboAmount = isCombo
     ? parseInt(state.combo.amount.replace("₹", "").replace(",", ""))
     : 0;
@@ -58,7 +64,6 @@ const Booking = () => {
           style={{ width: "1100px", maxWidth: "95%" }}
         >
           <Row className="g-0">
-
             {/* LEFT SECTION */}
             <Col md={7} className="p-4 bg-white">
               <h5 className="fw-bold">Checkout</h5>
@@ -76,7 +81,7 @@ const Booking = () => {
                 />
               </Form.Group>
 
-              {/* Ticket selection only for normal trips */}
+              {/* Ticket selection (normal trips only) */}
               {!isCombo && (
                 <Row className="mb-3">
                   <Col>
@@ -104,6 +109,7 @@ const Booking = () => {
                 onVerify={setPhoneVerified}
                 setPhone={setUserPhone}
               />
+
               <div className="mt-2">
                 <EmailVerification
                   compact
@@ -124,14 +130,14 @@ const Booking = () => {
               <h6 className="fw-bold mb-3">Payment Summary</h6>
 
               {isCombo && (
-                  <TicketCounter
-                    label="Members"
-                    price={comboAmount}
-                    count={members}
-                    setCount={setMembers}
-                    min={1}
-                  />
-                ) }
+                <TicketCounter
+                  label="Members"
+                  price={comboAmount}
+                  count={members}
+                  setCount={setMembers}
+                  min={1}
+                />
+              )}
 
               <hr className="opacity-25 my-2" />
 
@@ -146,8 +152,9 @@ const Booking = () => {
 
               <RazorpayPayment
                 amount={totalAmount}
-                disabled={!tripDate}
+                disabled={!tripDate || !emailVerified || !phoneVerified}
                 bookingData={{
+                  receiptId,
                   bookingType: isCombo ? "combo" : "normal",
                   placeName: name,
                   comboDetails: isCombo ? state.combo : null,
@@ -164,13 +171,12 @@ const Booking = () => {
                   showToast("❌ Payment failed: " + msg, "error")
                 }
               />
-
             </Col>
-
           </Row>
         </div>
       </Container>
 
+      {/* TOAST */}
       <ToastContainer position="top-end" className="p-3">
         <Toast
           show={toast.show}
