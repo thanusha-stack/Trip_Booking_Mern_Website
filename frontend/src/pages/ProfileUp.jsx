@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, Badge, Spinner } from "react-bootstrap";
 import jsPDF from "jspdf";
 
 const ProfileUp = () => {
@@ -21,7 +21,7 @@ const ProfileUp = () => {
         setBookings(data.bookings || []);
       } catch (err) {
         console.error(err);
-        alert("Error fetching bookings: " + err.message);
+        alert("Error fetching bookings");
       } finally {
         setLoading(false);
       }
@@ -30,11 +30,10 @@ const ProfileUp = () => {
     fetchBookings();
   }, [user]);
 
-  // Function to generate PDF receipt
   const downloadReceipt = (booking) => {
     const doc = new jsPDF();
 
-    doc.setFontSize(16);
+    doc.setFontSize(18);
     doc.text("Trip Booking Receipt", 105, 20, { align: "center" });
 
     doc.setFontSize(12);
@@ -54,71 +53,74 @@ const ProfileUp = () => {
       20,
       110
     );
-    doc.text(`Email Verified: ${booking.emailVerified ? "Yes" : "No"}`, 20, 120);
-    doc.text(`Phone Verified: ${booking.phoneVerified ? "Yes" : "No"}`, 20, 130);
 
-    doc.save(`Receipt_${booking.placeName}_${booking._id}.pdf`);
+    doc.save(`Receipt_${booking.placeName}.pdf`);
   };
 
   return (
-    <div className="container mt-5">
-      <div className="text-center mb-4">
-        <h4>{user.name}</h4>
-        <p>{user.email}</p>
-        <Button variant="dark" onClick={logout}>
-          Logout
-        </Button>
-      </div>
+    <div className="container my-5">
+      {/* Profile Card */}
+      <Card className="shadow-sm mb-4">
+        <Card.Body className="d-flex justify-content-between align-items-center flex-wrap">
+          <div>
+            <h4 className="mb-1">{user.name}</h4>
+            <p className="text-muted mb-0">{user.email}</p>
+          </div>
+          <Button variant="outline-danger" onClick={logout}>
+            Logout
+          </Button>
+        </Card.Body>
+      </Card>
 
-      <h5 className="mb-3">Booking History</h5>
+      {/* Booking Section */}
+      <h5 className="mb-3">Your Bookings</h5>
 
       {loading ? (
-        <p>Loading bookings...</p>
+        <div className="text-center my-5">
+          <Spinner animation="border" />
+        </div>
       ) : bookings.length === 0 ? (
-        <p>No bookings found.</p>
+        <p className="text-muted">No bookings found.</p>
       ) : (
         bookings.map((b) => (
-          <Card key={b._id} className="mb-3 shadow-sm">
+          <Card key={b._id} className="mb-4 shadow-sm">
             <Card.Body>
-              <Card.Title>{b.placeName}</Card.Title>
-              <Card.Subtitle className="mb-2 text-muted">
-                Trip Date: {new Date(b.tripDate).toLocaleDateString()}
-              </Card.Subtitle>
-
-              <div className="d-flex justify-content-between mb-1">
-                <span>Adults:</span>
-                <span>{b.adultCount}</span>
-              </div>
-
-              <div className="d-flex justify-content-between mb-1">
-                <span>Children:</span>
-                <span>{b.childCount}</span>
-              </div>
-
-              <div className="d-flex justify-content-between mb-1">
-                <span>Total Amount:</span>
-                <span>₹{b.totalAmount}</span>
-              </div>
-
-              <div className="d-flex justify-content-between mb-1">
-                <span>Payment Status:</span>
-                <span
-                  className={
-                    b.payment?.status === "succeeded" ? "text-success" : "text-danger"
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <h5 className="mb-0">{b.placeName}</h5>
+                <Badge
+                  bg={
+                    b.payment?.status === "succeeded"
+                      ? "success"
+                      : "warning"
                   }
                 >
                   {b.payment?.status || "Pending"}
-                </span>
+                </Badge>
               </div>
 
-              <div className="d-flex justify-content-between mb-1">
-                <span>Email Verified:</span>
-                <span>{b.emailVerified ? "Yes" : "No"}</span>
+              <p className="text-muted mb-2">
+                Trip Date: {new Date(b.tripDate).toLocaleDateString()}
+              </p>
+
+              <div className="row mb-2">
+                <div className="col-md-4">
+                  <strong>Adults:</strong> {b.adultCount}
+                </div>
+                <div className="col-md-4">
+                  <strong>Children:</strong> {b.childCount}
+                </div>
+                <div className="col-md-4">
+                  <strong>Total:</strong> ₹{b.totalAmount}
+                </div>
               </div>
 
-              <div className="d-flex justify-content-between mb-3">
-                <span>Phone Verified:</span>
-                <span>{b.phoneVerified ? "Yes" : "No"}</span>
+              <div className="mb-3">
+                <Badge bg={b.emailVerified ? "success" : "secondary"} className="me-2">
+                  Email {b.emailVerified ? "Verified" : "Not Verified"}
+                </Badge>
+                <Badge bg={b.phoneVerified ? "success" : "secondary"}>
+                  Phone {b.phoneVerified ? "Verified" : "Not Verified"}
+                </Badge>
               </div>
 
               <Button
