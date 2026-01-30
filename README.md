@@ -78,9 +78,7 @@ This project is built as a **real-world booking system** suitable for portfolios
 
 <p align="center">
   <img src="./Screenshots/payment.png" width="45%" />
-</p>
-<p align="center">
-  <img src="./Screenshots/razorpayPayment.png.png" width="45%" />
+   <img src="./Screenshots/razorpayPayment.png.png" width="45%" />
 </p>
 
 <p align="center">
