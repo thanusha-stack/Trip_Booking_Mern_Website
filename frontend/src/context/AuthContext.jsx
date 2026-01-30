@@ -6,20 +6,31 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore user on refresh
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
+
     if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (err) {
+        console.error("Invalid user JSON", err);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setUser(null);
+      }
     }
+
     setLoading(false);
   }, []);
 
   const login = (userData, token) => {
+    if (!userData || !token) return;
+
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(userData));
-    setUser(userData); // update navbar immediately
+    setUser(userData);
   };
 
   const logout = () => {
