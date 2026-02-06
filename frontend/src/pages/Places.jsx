@@ -23,7 +23,7 @@ function Places() {
 
   return (
     <div className="container">
-      <h2 className="text-center mb-4">All Tourist Places</h2>
+      <h2 className="text-center mb-4">Mysore Tourist Places</h2>
 
       {/* 🔍 Search + Category */}
       <div className="row mb-4">
