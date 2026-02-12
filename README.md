@@ -1,118 +1,106 @@
-# 🧳 Mysore Trip Booking – Fintech MERN Stack Website
+# 🧳 Travora – Advanced MERN Travel Marketplace (v3.0)
 
-A full-stack **MERN (MongoDB, Express, React, Node.js)** web application for booking Mysore tourism trips and combo packages with **secure authentication**, **Razorpay payments**, and a smooth checkout experience.
+**Travora** is a comprehensive full-stack **MERN (MongoDB, Express, React, Node.js)** platform designed for travel organizers and tourists. It facilitates seamless trip planning, dynamic itinerary management, and secure bookings with **Razorpay integration**.
 
 ---
 
-## 🚀 Features
+## 🚀 Version 3.0 New Features
+
+### 🏢 Organizer Dashboard
+- **Dynamic Itinerary Management**: Create day-by-day plans that automatically scale based on the selected trip duration.
+- **Advanced Pricing**: Separate pricing for Adults and Children.
+- **Logistics**: Specify Pick-up and Drop-off times for better trip coordination.
+- **Integrated Control**: Access the Organizer Dashboard directly from the Profile page.
+
+### 👥 Role-Based Access Control
+- **Dual Personas**: Choose between **Tourist** and **Organizer** during registration.
+- **Customized UI**: Navigation links and features adapt based on your selected role.
+
+### 🎨 Refined UX/UI
+- **Branding**: Complete transition to the "Travora" identity.
+- **Streamlined Navigation**: Redesigned Navbar with a prioritize "Dashboard" link and cleaner layout.
+- **Dynamic Forms**: Intelligent input fields that react to user data (like trip duration).
+
+---
+
+## 🛠️ Features (Base)
 
 ### 🔐 Authentication
-- User Registration & Login
-- Google OAuth Login
-- JWT-based authentication
-- Protected routes (Booking & Profile)
+- JWT-based secure login and registration.
+- Google OAuth 2.0 integration for one-click access.
 
-### 🗺️ Trip Booking
-- Individual place booking
-- Combo tour packages
-- Select number of members (Adults & Children)
-- Trip date selection
-- Email & phone verification before payment
+### 🗺️ Trip Booking & Management
+- Browse detailed combo tour packages.
+- Interactive booking counter for adults/children.
+- Automated total amount calculation.
+- Wishlist functionality for tourists.
 
 ### 💳 Payments
-- Stripe Payment Gateway integration
-- Secure PaymentIntent flow
-- Payment success / failure shown via popup (Toast)
-- Booking saved only after successful payment
-
-### 📦 Booking & Profile
-- Save booking details to MongoDB
-- View booking history
-- Profile page with booking receipt
-- Stores payment status & metadata
-
-### 🎨 UI / UX
-- Responsive design using React Bootstrap
-- Carousel-based combo trip display
-- Clean checkout UI
-- Toast notifications instead of alerts
+- **Razorpay Payment Gateway**: Seamless and secure transaction flow.
+- Real-time payment verification.
+- **Stripe Support**: Legacy or alternative payment support built-in.
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- React.js
-- React Router DOM
-- React Bootstrap
-- Axios
-- Razorpay payment gateway
-- Google OAuth (`@react-oauth/google`)
+- **React.js** (Hooks, Context API)
+- **React Bootstrap** for premium responsiveness.
+- **Axios** (API communication).
+- **React Router DOM** (Client-side routing).
 
 ### Backend
-- Node.js
-- Express.js
-- MongoDB & Mongoose
-- JWT Authentication
-- Bcrypt.js
-- Stripe API
+- **Node.js & Express.js**
+- **MongoDB & Mongoose** (NoSQL Database).
+- **JWT Authentication** & **Bcrypt.js** (Security).
+- **Razorpay SDK** (Payment processing).
 
 ---
 
+## 📸 Website Preview
+
+<p align="center">
+  <img src="./Screenshots/home.png" width="45%" alt="Home Page" />
+  <img src="./Screenshots/login.png" width="45%" alt="Role-based Login" />
+</p>
+
+<p align="center">
+  <img src="./Screenshots/placelist.png" width="45%" alt="Trip Listings" />
+  <img src="./Screenshots/details.png" width="45%" alt="Dynamic Details" />
+</p>
+
+<p align="center">
+  <img src="./Screenshots/payment.png" width="45%" alt="Checkout Flow" />
+  <img src="./Screenshots/razorpayPayment.png.png" width="45%" alt="Secure Payment" />
+</p>
 
 ---
 
-## 📸 Website Screenshots
-
-<p align="center">
-  <img src="./Screenshots/home.png" width="45%" />
-  <img src="./Screenshots/login.png" width="45%" />
-</p>
-
-<p align="center">
-  <img src="./Screenshots/placelist.png" width="45%" />
-  <img src="./Screenshots/details.png" width="45%" />
-</p>
-
-<p align="center">
-  <img src="./Screenshots/payment.png" width="45%" />
-   <img src="./Screenshots/razorpayPayment.png.png" width="45%" />
-</p>
-
-<p align="center">
-  <img src="./Screenshots/profile.png.png" width="45%" />
-</p>
----
-
-## 🔑 Environment Variables
+## 🔑 Setup & Environment Variables
 
 ### Backend (`backend/.env`)
-- MONGO_URI=mongodb://127.0.0.1:27017/tripBookingDb
-- SECRET=your_jwt_secret
-- STRIPE_SECRET_KEY=your_stripe_secret_key
-
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+SECRET=your_jwt_secret_key
+RAZORPAY_KEY_ID=your_key_id
+RAZORPAY_KEY_SECRET=your_key_secret
+GOOGLE_CLIENT_ID=your_google_id
+```
 
 ### Frontend (`frontend/.env`)
-- REACT_APP_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-- REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id
+```env
+REACT_APP_API_URL=http://localhost:5000
+REACT_APP_RAZORPAY_KEY_ID=your_key_id
+REACT_APP_GOOGLE_CLIENT_ID=your_google_id
+```
 
-### 🔒 Protected Routes
+---
 
-- /booking
-- /profile
-- These routes are accessible only after login.
-
-### 💡 Future Enhancements
-
-- Admin dashboard
-- Seat availability & capacity management
-- Refund & cancellation system
-- Email confirmation after booking
-- Invoice PDF generation
-- Role-based access (Admin/User)
-
-### 👩‍💻 Author
-- Thanusha
-- Aspiring MERN-Stack Developer (MERN)
+## 👩‍💻 Author
+- **Thanusha**
+- Full-Stack Developer (MERN)
 - 📍 India
+
 ---
