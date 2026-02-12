@@ -57,28 +57,6 @@
 - **Razorpay SDK** (Payment processing).
 
 ---
-
-## 🔑 Setup & Environment Variables
-
-### Backend (`backend/.env`)
-```env
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-SECRET=your_jwt_secret_key
-RAZORPAY_KEY_ID=your_key_id
-RAZORPAY_KEY_SECRET=your_key_secret
-GOOGLE_CLIENT_ID=your_google_id
-```
-
-### Frontend (`frontend/.env`)
-```env
-REACT_APP_API_URL=http://localhost:5000
-REACT_APP_RAZORPAY_KEY_ID=your_key_id
-REACT_APP_GOOGLE_CLIENT_ID=your_google_id
-```
-
----
-
 ## 👩‍💻 Author
 - **Thanusha**
 - Full-Stack Developer (MERN)
