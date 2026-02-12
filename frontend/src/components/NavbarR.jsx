@@ -32,6 +32,7 @@ function NavbarR() {
                 {user.role === "tourist" && (
                   <>
                     <Nav.Link as={NavLink} to="/tourist/dashboard">Dashboard</Nav.Link>
+                    <Nav.Link as={NavLink} to="/places">Browse Trip</Nav.Link>
                     <Nav.Link as={NavLink} to="/tourist/wishlist">Wishlist</Nav.Link>
                   </>
                 )}

@@ -1,0 +1,82 @@
+.night-sky {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.stars-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.5;
+    box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.8);
+    animation: twinkle var(--duration) infinite ease-in-out;
+}
+
+@keyframes twinkle {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.5);
+    }
+}
+
+/* Shooting star effect */
+.night-sky::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2px;
+    height: 2px;
+    background: white;
+    opacity: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 10px 2px white;
+    animation: shooting-star 5s linear infinite;
+    animation-delay: 2s;
+}
+
+@keyframes shooting-star {
+    0% {
+        transform: translate(-200px, -200px) rotate(45deg) scale(0);
+        opacity: 0;
+    }
+
+    10% {
+        transform: translate(0, 0) rotate(45deg) scale(1);
+        opacity: 1;
+    }
+
+    20% {
+        transform: translate(200px, 200px) rotate(45deg) scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translate(200px, 200px) rotate(45deg) scale(0);
+        opacity: 0;
+    }
+}
