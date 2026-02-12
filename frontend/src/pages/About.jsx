@@ -2,15 +2,15 @@ import React from 'react';
 
 const About = () => {
   return (
-     <>
+    <>
       <section className="py-5">
         <div className="container">
           <div className="row align-items-center">
             <div className="col-md-6">
-              <h3 className="fw-bold mb-3">Welcome to Mysore Tourism</h3>
+              <h3 className="fw-bold mb-3">Welcome to Travora</h3>
 
               <p>
-                Mysore Tourism is a digital platform designed to simplify travel
+                Travora is a digital platform designed to simplify travel
                 planning through organized tour packages, secure advance booking,
                 and transparent payment management.
               </p>
@@ -34,7 +34,7 @@ const About = () => {
               <img
                 src="/assets/images/kukLake.png"
                 className="img-fluid rounded shadow"
-                alt="Mysore Tourism"
+                alt="Travora"
               />
             </div>
 
@@ -93,7 +93,7 @@ const About = () => {
 
       <footer className="bg-dark text-white text-center py-3">
         <p className="mb-0">
-          © 2025 Mysore Tourism. All Rights Reserved.
+          © 2025 Travora. All Rights Reserved.
         </p>
       </footer>
     </>

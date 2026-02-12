@@ -8,11 +8,11 @@ function NavbarR() {
 
   return (
     <Navbar bg="dark" variant="dark" expand="lg" sticky="top" className="shadow-sm">
-     
+
       <Container>
         <Navbar.Brand as={NavLink} to="/" className="fw-bold">
-         <i className="bi bi-twitter me-2"></i>
-          Mysore <span className="text-primary">Tourism</span>
+          <i className="bi bi-twitter me-2"></i>
+          Travora
         </Navbar.Brand>
 
         {/* ✅ Hamburger */}
@@ -21,34 +21,35 @@ function NavbarR() {
         {/* ✅ Collapsible Menu */}
         <Navbar.Collapse id="navMenu">
           <Nav className="ms-auto align-items-lg-center gap-2">
-            {["about", "places", "contact"].map((path) => (
-              <Nav.Link
-                key={path}
-                as={NavLink}
-                to={`/${path}`}
-                className="text-capitalize"
-              >
-                {path}
-              </Nav.Link>
-            ))}
+            {user && (
+              <>
+                {user.role === "organizer" && (
+                  <>
+                    <Nav.Link as={NavLink} to="/profile">Dashboard</Nav.Link>
+                    <Nav.Link as={NavLink} to="/organizer/create-trip">Post Trip</Nav.Link>
+                  </>
+                )}
+                {user.role === "tourist" && (
+                  <>
+                    <Nav.Link as={NavLink} to="/tourist/dashboard">Dashboard</Nav.Link>
+                    <Nav.Link as={NavLink} to="/tourist/wishlist">Wishlist</Nav.Link>
+                  </>
+                )}
+              </>
+            )}
+
+            <Nav.Link as={NavLink} to="/about" className="text-capitalize">About</Nav.Link>
+            <Nav.Link as={NavLink} to="/contact" className="text-capitalize">Contact</Nav.Link>
 
             {user ? (
-              <>
-                <button
-                  className="btn btn-outline-light me-2"
-                  onClick={() => navigate("/profile")}
-                >
-                  Profile
-                </button>
-                <button
-                  className="btn btn-outline-danger"
-                  onClick={logout}
-                >
-                  Logout
-                </button>
-              </>
+              <button
+                className="btn btn-outline-danger ms-lg-2"
+                onClick={logout}
+              >
+                Logout
+              </button>
             ) : (
-              <NavLink to="/login" className="btn btn-primary">
+              <NavLink to="/login" className="btn btn-primary ms-lg-2">
                 Login
               </NavLink>
             )}

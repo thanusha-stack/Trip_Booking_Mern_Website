@@ -18,23 +18,28 @@ import Places from "./pages/Places";
 import Details from "./components/Details";
 import Booking from "./pages/Booking";
 import Login from "./pages/Login";
-import MarqueeBar from "./components/MarqueeBar";
 import ProfileUp from "./pages/ProfileUp";
+
+// New Marketplace Pages
+import OrganizerDashboard from "./pages/organizer/OrganizerDashboard";
+import CreateTrip from "./pages/organizer/CreateTrip";
+import EditTrip from "./pages/organizer/EditTrip";
+import TouristDashboard from "./pages/tourist/TouristDashboard";
+import Wishlist from "./pages/tourist/Wishlist";
 
 // 🔹 Handles navbar switching based on route
 const LayoutContent = () => {
   return (
     <>
-      <NavbarR className="sticky-top shadow-sm"/>
-      <MarqueeBar />
+      <NavbarR className="sticky-top shadow-sm" />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/places" element={<Places />} />
-        <Route path="/place/:name" element={<Details />} />
+        <Route path="/place/:id" element={<Details />} />
         <Route path="/login" element={<Login />} />
-        
+
         <Route
           path="/booking"
           element={
@@ -48,6 +53,48 @@ const LayoutContent = () => {
           element={
             <ProtectedRoute>
               <ProfileUp />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Marketplace Routes */}
+        <Route
+          path="/organizer/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["organizer"]}>
+              <OrganizerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organizer/create-trip"
+          element={
+            <ProtectedRoute allowedRoles={["organizer"]}>
+              <CreateTrip />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/organizer/edit-trip/:id"
+          element={
+            <ProtectedRoute allowedRoles={["organizer"]}>
+              <EditTrip />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tourist/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={["tourist"]}>
+              <TouristDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tourist/wishlist"
+          element={
+            <ProtectedRoute allowedRoles={["tourist"]}>
+              <Wishlist />
             </ProtectedRoute>
           }
         />

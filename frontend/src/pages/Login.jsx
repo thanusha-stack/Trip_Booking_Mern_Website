@@ -4,29 +4,35 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const API = process.env.REACT_APP_API_URL;
+const API = `${process.env.REACT_APP_API_URL}/api/auth`;
 
 function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const [isLogin, setIsLogin] = useState(true);
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: "tourist" });
 
   // Normal login
   const handleLogin = async () => {
+    try {
       const res = await axios.post(`${API}/login`, form);
-       login(res.data.user, res.data.token);
-      navigate("/"); 
-    
+      login(res.data.user, res.data.token);
+      navigate("/");
+    } catch (err) {
+      alert(err.response?.data?.message || "Login failed");
+    }
   };
 
   // Register
   const handleRegister = async () => {
-  
+    try {
       const res = await axios.post(`${API}/register`, form);
+      alert("Registration successful! Please login.");
       setIsLogin(true);
-  
+    } catch (err) {
+      alert(err.response?.data?.message || "Registration failed");
+    }
   };
 
   // Google login
@@ -38,8 +44,8 @@ function Login() {
     login(res.data.user, res.data.token);
     alert("Google Login Successful");
     navigate("/");
-  
-};
+
+  };
 
 
   return (
@@ -60,9 +66,26 @@ function Login() {
             LOGIN
           </button>
         ) : (
-          <button onClick={handleRegister} style={{ width: "100%", padding: "10px", background: "#4d64d9", color: "white", border: "none", borderRadius: "4px", fontWeight: "600" }}>
-            REGISTER
-          </button>
+          <>
+            <select
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginBottom: "15px",
+                border: "none",
+                borderRadius: "4px",
+                background: "#eee",
+              }}
+            >
+              <option value="tourist">Tourist</option>
+              <option value="organizer">Organizer</option>
+            </select>
+            <button onClick={handleRegister} style={{ width: "100%", padding: "10px", background: "#4d64d9", color: "white", border: "none", borderRadius: "4px", fontWeight: "600" }}>
+              REGISTER
+            </button>
+          </>
         )}
 
         <p onClick={() => setIsLogin(!isLogin)} style={{ cursor: "pointer", color: "#f53939", marginTop: "15px", fontSize: "14px" }}>

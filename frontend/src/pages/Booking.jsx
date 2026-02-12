@@ -1,50 +1,37 @@
 import { useLocation } from "react-router-dom";
 import { useState, useRef } from "react";
-import { Container, Row, Col, Form, Toast, ToastContainer } from "react-bootstrap";
+import { Container, Row, Col, Form, Card, Toast, ToastContainer, Button } from "react-bootstrap";
+import { useAuth } from "../context/AuthContext";
 
-import EmailVerification from "../components/EmailVerification";
-import PhoneVerification from "../components/PhoneVerification";
 import RazorpayPayment from "../components/RazorpayPayment";
 import TicketCounter from "../components/TicketCounter";
 
 const Booking = () => {
   const { state } = useLocation();
+  const { user } = useAuth();
   const receiptIdRef = useRef(`MYT-${Date.now()}`);
 
-  const [members, setMembers] = useState(1);
-  const [userEmail, setUserEmail] = useState("");
-  const [userPhone, setUserPhone] = useState("");
   const [adult, setAdult] = useState(1);
   const [child, setChild] = useState(0);
   const [tripDate, setTripDate] = useState("");
-  const [emailVerified, setEmailVerified] = useState(false);
-  const [phoneVerified, setPhoneVerified] = useState(false);
 
+  // For simplicity in this marketplace refactor, we'll assume auth takes care of identity
   const [toast, setToast] = useState({
     show: false,
     message: "",
     type: "success",
   });
 
-  /* ✅ conditional return AFTER hooks */
-  if (!state) {
-    return <div className="text-center mt-5">No booking data</div>;
+  if (!state || !state.tripId) {
+    return <div className="text-center mt-5">No booking data found. Please select a trip from the <a href="/places">browse</a> page.</div>;
   }
 
-  /* 🔹 Detect combo booking */
-  const isCombo = !!state.combo;
-  const name = isCombo ? state.combo.title : state.name;
+  const { tripId, tripName, price } = state;
+  const adultPrice = typeof price === 'object' ? price.adult : price;
+  // If price is object, use price.child, else default to 50% of adult price
+  const childPrice = typeof price === 'object' ? price.child : (price * 0.5);
 
-  const comboAmount = isCombo
-    ? parseInt(state.combo.amount.replace("₹", "").replace(",", ""))
-    : 0;
-
-  const adultFee = isCombo ? 0 : state.adultFee;
-  const childFee = isCombo ? 0 : state.childFee;
-
-  const totalAmount = isCombo
-    ? comboAmount * members
-    : adult * adultFee + child * childFee;
+  const totalAmount = (adult * adultPrice) + (child * childPrice);
 
   const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
@@ -53,130 +40,116 @@ const Booking = () => {
 
   return (
     <>
-      <Container
-        fluid
-        className="min-vh-95 d-flex align-items-center justify-content-center bg-light"
-      >
-        <div
-          className="shadow-lg rounded overflow-hidden"
-          style={{ width: "1100px", maxWidth: "95%" }}
-        >
-          <Row className="g-0">
-            {/* LEFT */}
-            <Col md={7} className="p-4 bg-white">
-              <h5 className="fw-bold">Checkout</h5>
-              <p className="text-muted small">
-                Booking for <strong>{name}</strong>
-              </p>
+      <Container className="my-5">
+        <Row className="justify-content-center">
+          <Col lg={10}>
+            <Card className="shadow-lg border-0 overflow-hidden">
+              <Row className="g-0">
+                {/* INFO SIDE */}
+                <Col md={7} className="p-4 bg-white border-end">
+                  <h4 className="fw-bold mb-4">Confirm Your Booking</h4>
+                  <div className="mb-4">
+                    <h6 className="text-muted small text-uppercase">TRIP PACKAGE</h6>
+                    <h5 className="fw-bold">{tripName}</h5>
+                  </div>
 
-              <Form.Group className="mb-3">
-                <Form.Label className="small">Trip Date</Form.Label>
-                <Form.Control
-                  size="sm"
-                  type="date"
-                  min={new Date().toISOString().split("T")[0]}
-                  value={tripDate}
-                  onChange={(e) => setTripDate(e.target.value)}
-                />
-              </Form.Group>
-
-              {!isCombo && (
-                <Row className="mb-3">
-                  <Col>
-                    <TicketCounter
-                      label="Adults"
-                      price={adultFee}
-                      count={adult}
-                      setCount={setAdult}
-                      min={1}
+                  <Form.Group className="mb-4">
+                    <Form.Label className="fw-bold">Select Trip Date</Form.Label>
+                    <Form.Control
+                      type="date"
+                      min={new Date().toISOString().split("T")[0]}
+                      value={tripDate}
+                      onChange={(e) => setTripDate(e.target.value)}
+                      className="py-2"
                     />
-                  </Col>
-                  <Col>
-                    <TicketCounter
-                      label="Children"
-                      price={childFee}
-                      count={child}
-                      setCount={setChild}
-                    />
-                  </Col>
-                </Row>
-              )}
+                  </Form.Group>
 
-              <PhoneVerification
-                compact
-                onVerify={setPhoneVerified}
-                setPhone={setUserPhone}
-              />
+                  <div className="mb-4">
+                    <h6 className="fw-bold mb-3">Number of Travelers</h6>
+                    <Row className="g-3">
+                      <Col sm={6}>
+                        <TicketCounter
+                          label={`Adults (₹${adultPrice})`}
+                          price={adultPrice}
+                          count={adult}
+                          setCount={setAdult}
+                          min={1}
+                        />
+                      </Col>
+                      <Col sm={6}>
+                        <TicketCounter
+                          label={`Children (₹${childPrice})`}
+                          price={childPrice}
+                          count={child}
+                          setCount={setChild}
+                        />
+                      </Col>
+                    </Row>
+                  </div>
 
-              <div className="mt-2">
-                <EmailVerification
-                  compact
-                  onVerify={setEmailVerified}
-                  setEmail={setUserEmail}
-                />
-              </div>
-            </Col>
+                  <div className="alert alert-info py-2 small">
+                    <i className="bi bi-info-circle me-2"></i>
+                    A booking confirmation will be sent to <strong>{user.email}</strong>
+                  </div>
+                </Col>
 
-            {/* RIGHT */}
-            <Col
-              md={5}
-              className="p-4 text-white"
-              style={{
-                background: "linear-gradient(135deg, #2563eb, #1e40af)",
-              }}
-            >
-              <h6 className="fw-bold mb-3">Payment Summary</h6>
+                {/* SUMMARY & PAYMENT SIDE */}
+                <Col md={5} className="p-4 bg-light">
+                  <h5 className="fw-bold mb-4">Payment Summary</h5>
+                  <div className="d-flex justify-content-between mb-2">
+                    <span>Adults (x{adult})</span>
+                    <span>₹{adult * adultPrice}</span>
+                  </div>
+                  {child > 0 && (
+                    <div className="d-flex justify-content-between mb-2">
+                      <span>Children (x{child})</span>
+                      <span>₹{child * childPrice}</span>
+                    </div>
+                  )}
+                  <hr className="my-3" />
+                  <div className="d-flex justify-content-between fs-4 fw-bold text-dark mb-4">
+                    <span>Grand Total</span>
+                    <span>₹{totalAmount}</span>
+                  </div>
 
-              {isCombo && (
-                <TicketCounter
-                  label="Members"
-                  price={comboAmount}
-                  count={members}
-                  setCount={setMembers}
-                  min={1}
-                />
-              )}
+                  <div className="mb-4">
+                    <small className="text-muted d-block mb-2">Scheduled for:</small>
+                    <div className="fw-bold fs-5">{tripDate ? new Date(tripDate).toLocaleDateString() : "Please select a date"}</div>
+                  </div>
 
-              <hr className="opacity-25 my-2" />
+                  <RazorpayPayment
+                    amount={totalAmount}
+                    disabled={!tripDate || totalAmount <= 0}
+                    bookingData={{
+                      tripId,
+                      tripName,
+                      userName: user.name,
+                      userEmail: user.email,
+                      adultCount: adult,
+                      childCount: child,
+                      totalAmount,
+                      tripDate,
+                      payment: {
+                        method: "razorpay",
+                        status: "paid"
+                      }
+                    }}
+                    onSuccess={() =>
+                      showToast("✅ Payment & Booking Successful!", "success")
+                    }
+                    onError={(msg) =>
+                      showToast("❌ Payment failed: " + msg, "error")
+                    }
+                  />
 
-              <div className="d-flex justify-content-between fs-5 fw-bold">
-                <span>Total</span>
-                <span>₹{totalAmount}</span>
-              </div>
-
-              <p className="small opacity-75 mt-2">
-                Date: {tripDate || "—"}
-              </p>
-
-              <RazorpayPayment
-                amount={totalAmount}
-                disabled={
-                  !tripDate ||
-                  totalAmount <= 0 ||
-                  !emailVerified ||
-                  !phoneVerified
-                }
-                bookingData={{
-                  receiptId: receiptIdRef.current,
-                  bookingType: isCombo ? "combo" : "normal",
-                  placeName: name,
-                  comboDetails: isCombo ? state.combo : null,
-                  userEmail,
-                  userPhone,
-                  adultCount: isCombo ? null : adult,
-                  childCount: isCombo ? null : child,
-                  tripDate,
-                }}
-                onSuccess={() =>
-                  showToast("✅ Payment & Booking Successful!", "success")
-                }
-                onError={(msg) =>
-                  showToast("❌ Payment failed: " + msg, "error")
-                }
-              />
-            </Col>
-          </Row>
-        </div>
+                  <p className="text-center text-muted small mt-4 mb-0">
+                    <i className="bi bi-lock-fill me-1"></i> Secure 256-bit SSL Encrypted Payment
+                  </p>
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+        </Row>
       </Container>
 
       <ToastContainer position="top-end" className="p-3">

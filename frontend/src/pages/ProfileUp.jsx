@@ -3,13 +3,17 @@ import { useAuth } from "../context/AuthContext";
 import { Card, Button, Badge, Spinner } from "react-bootstrap";
 import jsPDF from "jspdf";
 
+import OrganizerDashboard from "./organizer/OrganizerDashboard";
+
 const ProfileUp = () => {
   const { user, logout } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
+
   useEffect(() => {
-    if (!user?.email) return;
+    if (!user?.email || user.role === "organizer") return;
 
     const fetchBookings = async () => {
       try {
@@ -56,6 +60,11 @@ const ProfileUp = () => {
 
     doc.save(`Receipt_${booking.placeName}.pdf`);
   };
+
+  // If Organizer, show Dashboard instead of Booking History
+  if (user && user.role === "organizer") {
+    return <OrganizerDashboard />;
+  }
 
   return (
     <div className="container my-5">
