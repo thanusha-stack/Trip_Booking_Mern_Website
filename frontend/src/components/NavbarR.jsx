@@ -12,7 +12,7 @@ function NavbarR() {
       <Container>
         <Navbar.Brand as={NavLink} to="/" className="fw-bold">
           <i className="bi bi-twitter me-2"></i>
-          Travora
+          Travora Trip
         </Navbar.Brand>
 
         {/* ✅ Hamburger */}

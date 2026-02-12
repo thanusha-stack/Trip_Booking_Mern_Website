@@ -1,6 +1,6 @@
-# 🧳 Travora – Advanced MERN Travel Marketplace (v3.0)
+# 🧳 Travora Trip – Advanced MERN Travel Marketplace (v3.0)
 
-**Travora** is a comprehensive full-stack **MERN (MongoDB, Express, React, Node.js)** platform designed for travel organizers and tourists. It facilitates seamless trip planning, dynamic itinerary management, and secure bookings with **Razorpay integration**.
+**Travora Trip** is a comprehensive full-stack **MERN (MongoDB, Express, React, Node.js)** platform designed for travel organizers and tourists. It facilitates seamless trip planning, dynamic itinerary management, and secure bookings with **Razorpay integration**.
 
 ---
 
@@ -17,7 +17,7 @@
 - **Customized UI**: Navigation links and features adapt based on your selected role.
 
 ### 🎨 Refined UX/UI
-- **Branding**: Complete transition to the "Travora" identity.
+- **Branding**: Complete transition to the "Travora Trip" identity.
 - **Streamlined Navigation**: Redesigned Navbar with a prioritize "Dashboard" link and cleaner layout.
 - **Dynamic Forms**: Intelligent input fields that react to user data (like trip duration).
 
