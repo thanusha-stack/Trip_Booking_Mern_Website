@@ -2,8 +2,6 @@
 
 A full-stack **MERN (MongoDB, Express, React, Node.js)** web application for booking Mysore tourism trips and combo packages with **secure authentication**, **Razorpay payments**, and a smooth checkout experience.
 
-This project is built as a **real-world booking system** suitable for portfolios, interviews, and production-style learning.
-
 ---
 
 ## 🚀 Features
