@@ -58,25 +58,6 @@
 
 ---
 
-## 📸 Website Preview
-
-<p align="center">
-  <img src="./Screenshots/home.png" width="45%" alt="Home Page" />
-  <img src="./Screenshots/login.png" width="45%" alt="Role-based Login" />
-</p>
-
-<p align="center">
-  <img src="./Screenshots/placelist.png" width="45%" alt="Trip Listings" />
-  <img src="./Screenshots/details.png" width="45%" alt="Dynamic Details" />
-</p>
-
-<p align="center">
-  <img src="./Screenshots/payment.png" width="45%" alt="Checkout Flow" />
-  <img src="./Screenshots/razorpayPayment.png.png" width="45%" alt="Secure Payment" />
-</p>
-
----
-
 ## 🔑 Setup & Environment Variables
 
 ### Backend (`backend/.env`)
