@@ -99,6 +99,12 @@ const LayoutContent = () => {
           }
         />
       </Routes>
+
+      {/* 🚀 Floating Author Bar */}
+      <div className="author-float-bar">
+        <span className="dot"></span>
+        AUTHOR: THANUSHA A (7376231CS332)
+      </div>
     </>
   );
 };
