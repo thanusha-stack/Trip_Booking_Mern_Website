@@ -19,6 +19,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
+      "https://travora-trip.onrender.com",
       "https://mysore-tourism.onrender.com",
       "https://trip-booking-mern-website.onrender.com",
     ],
