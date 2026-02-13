@@ -7,7 +7,7 @@ function Carosel() {
   const navigate = useNavigate();
   return (
     <div className="container mt-5">
-      <h2 className="text-center mb-4">Combos in Travora</h2>
+      <h2 className="text-center mb-4">Trending Combos in Travora</h2>
       <Carousel fade>
         {carouselData.map(item => (
           <Carousel.Item key={item.id}>

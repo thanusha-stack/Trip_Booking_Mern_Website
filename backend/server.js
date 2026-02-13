@@ -27,12 +27,7 @@ app.use(
   })
 );
 
-// ===== HEADERS (Google Login Fix) =====
-app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
-  res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
-  next();
-});
+
 
 // ===== RAZORPAY =====
 const razorpay = new Razorpay({

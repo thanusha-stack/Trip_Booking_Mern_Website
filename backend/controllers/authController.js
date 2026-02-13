@@ -1,10 +1,10 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { OAuth2Client } = require("google-auth-library");
+
 
 const SECRET = process.env.SECRET || "mysore-trip-booking-secret";
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 
 exports.register = async (req, res) => {
     try {
@@ -56,32 +56,7 @@ exports.login = async (req, res) => {
     }
 };
 
-exports.googleLogin = async (req, res) => {
-    try {
-        const { tokenId } = req.body;
 
-        const ticket = await googleClient.verifyIdToken({
-            idToken: tokenId,
-            audience: process.env.GOOGLE_CLIENT_ID,
-        });
-
-        const { email, name, email_verified } = ticket.getPayload();
-        if (!email_verified) {
-            return res.status(400).json({ message: "Google email not verified" });
-        }
-
-        let user = await User.findOne({ email });
-        if (!user) {
-            user = await User.create({ name, email, role: "tourist" });
-        }
-
-        const token = jwt.sign({ id: user._id }, SECRET, { expiresIn: "1h" });
-        res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
-    } catch (err) {
-        console.error("Google login error:", err);
-        res.status(500).json({ message: "Google login failed" });
-    }
-};
 
 exports.getMe = async (req, res) => {
     res.json(req.user);

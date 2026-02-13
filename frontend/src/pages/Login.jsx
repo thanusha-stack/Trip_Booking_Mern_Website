@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { GoogleLogin } from "@react-oauth/google";
+
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -35,17 +35,7 @@ function Login() {
     }
   };
 
-  // Google login
-  const handleGoogleLogin = async (credentialResponse) => {
 
-    const res = await axios.post(`${API}/google-login`, {
-      tokenId: credentialResponse.credential, // must match backend
-    });
-    login(res.data.user, res.data.token);
-    alert("Google Login Successful");
-    navigate("/");
-
-  };
 
 
   return (
@@ -92,9 +82,7 @@ function Login() {
           <u>{isLogin ? "Not a member? Sign up now" : "Already Registered? Login here"}</u>
         </p>
 
-        <hr />
-        <h6>OR</h6>
-        <GoogleLogin onSuccess={handleGoogleLogin} onError={() => alert("Google Login Failed")} />
+
       </div>
     </div>
   );
