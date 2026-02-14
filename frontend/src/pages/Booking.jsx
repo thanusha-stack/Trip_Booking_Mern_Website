@@ -22,14 +22,31 @@ const Booking = () => {
     type: "success",
   });
 
-  if (!state || !state.tripId) {
+  // Handle both carousel combo data and regular trip data
+  if (!state || (!state.tripId && !state.combo)) {
     return <div className="text-center mt-5">No booking data found. Please select a trip from the <a href="/places">browse</a> page.</div>;
   }
 
-  const { tripId, tripName, price } = state;
-  const adultPrice = typeof price === 'object' ? price.adult : price;
-  // If price is object, use price.child, else default to 50% of adult price
-  const childPrice = typeof price === 'object' ? price.child : (price * 0.5);
+  // Extract data based on source (carousel combo or regular trip)
+  let tripId, tripName, adultPrice, childPrice;
+
+  if (state.combo) {
+    // Data from carousel
+    const { combo } = state;
+    tripId = `COMBO-${combo.id}`;
+    tripName = combo.title;
+    // Parse amount string (e.g., "₹1,200" -> 1200)
+    const amountStr = combo.amount.replace(/[₹,]/g, '');
+    adultPrice = parseInt(amountStr);
+    childPrice = adultPrice * 0.5; // 50% for children
+  } else {
+    // Data from regular trip (Places page)
+    tripId = state.tripId;
+    tripName = state.tripName;
+    const price = state.price;
+    adultPrice = typeof price === 'object' ? price.adult : price;
+    childPrice = typeof price === 'object' ? price.child : (price * 0.5);
+  }
 
   const totalAmount = (adult * adultPrice) + (child * childPrice);
 

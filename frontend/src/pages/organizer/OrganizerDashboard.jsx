@@ -46,9 +46,9 @@ const OrganizerDashboard = () => {
     return (
         <Container className="mt-5">
             <h2>Welcome, {user.name} (Organizer)</h2>
-            <Row className="mt-4">
-                <Col md={4}>
-                    <Card className="text-center shadow-sm">
+            <Row className="mt-4 justify-content-center">
+                <Col md={4} className="mb-3">
+                    <Card className="text-center shadow-sm h-100">
                         <Card.Body>
                             <Card.Title>Total Trips</Card.Title>
                             <h3>{trips.length}</h3>
@@ -56,8 +56,8 @@ const OrganizerDashboard = () => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={4}>
-                    <Card className="text-center shadow-sm">
+                <Col md={4} className="mb-3">
+                    <Card className="text-center shadow-sm h-100">
                         <Card.Body>
                             <Card.Title>Total Bookings</Card.Title>
                             <h3>{bookings.length}</h3>

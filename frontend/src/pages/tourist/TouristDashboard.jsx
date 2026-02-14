@@ -20,9 +20,9 @@ const TouristDashboard = () => {
     return (
         <Container className="mt-5">
             <h2>Welcome, {user.name}</h2>
-            <Row className="mt-4">
-                <Col md={4}>
-                    <Card className="text-center shadow-sm">
+            <Row className="mt-4 justify-content-center">
+                <Col md={4} className="mb-3">
+                    <Card className="text-center shadow-sm h-100">
                         <Card.Body>
                             <Card.Title>My Bookings</Card.Title>
                             <h3>{bookings.length}</h3>
@@ -30,12 +30,12 @@ const TouristDashboard = () => {
                         </Card.Body>
                     </Card>
                 </Col>
-                <Col md={4}>
-                    <Card className="text-center shadow-sm border-0 bg-light p-2">
+                <Col md={4} className="mb-3">
+                    <Card className="text-center shadow-sm h-100">
                         <Card.Body>
-                            <Card.Title className="text-muted small text-uppercase fw-bold">Wishlist Items</Card.Title>
-                            <h2 className="fw-bold">{user.wishlist?.length || 0}</h2>
-                            <Link to="/tourist/wishlist" className="btn btn-sm btn-outline-primary mt-2">Manage Favorites</Link>
+                            <Card.Title>Wishlist Items</Card.Title>
+                            <h3>{user.wishlist?.length || 0}</h3>
+                            <Link to="/tourist/wishlist" className="btn btn-outline-primary mt-2">Manage Favorites</Link>
                         </Card.Body>
                     </Card>
                 </Col>
