@@ -15,22 +15,28 @@ function Login() {
 
   // Normal login
   const handleLogin = async () => {
+    console.log("Attempting login at:", `${API}/login`);
     try {
       const res = await axios.post(`${API}/login`, form);
+      console.log("Login success:", res.data);
       login(res.data.user, res.data.token);
       navigate("/");
     } catch (err) {
+      console.error("Login error:", err);
       alert(err.response?.data?.message || "Login failed");
     }
   };
 
   // Register
   const handleRegister = async () => {
+    console.log("Attempting register at:", `${API}/register`);
     try {
       const res = await axios.post(`${API}/register`, form);
+      console.log("Register success:", res.data);
       alert("Registration successful! Please login.");
       setIsLogin(true);
     } catch (err) {
+      console.error("Register error:", err);
       alert(err.response?.data?.message || "Registration failed");
     }
   };
