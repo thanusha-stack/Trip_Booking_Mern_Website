@@ -30,7 +30,8 @@ function Places() {
       setTrips(res.data);
     } catch (err) {
       console.error("Error fetching trips:", err);
-      setError("Failed to connect to the server. Please make sure the backend is running.");
+      const msg = err.response?.data?.error || err.response?.data?.message || err.message || "Failed to connect to the server.";
+      setError(`${msg}. Please make sure the backend is running.`);
     } finally {
       setLoading(false);
     }
