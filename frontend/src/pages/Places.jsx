@@ -6,6 +6,7 @@ import { Container, Row, Col, Form, Spinner } from "react-bootstrap";
 function Places() {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     destination: "",
     category: "All",
@@ -29,6 +30,7 @@ function Places() {
       setTrips(res.data);
     } catch (err) {
       console.error("Error fetching trips:", err);
+      setError("Failed to connect to the server. Please make sure the backend is running.");
     } finally {
       setLoading(false);
     }
@@ -40,7 +42,14 @@ function Places() {
 
   return (
     <Container className="mt-4">
-      <h2 className="text-center mb-4 fw-bold">Explore Our Trip Collections</h2>
+      <h2 className="text-center mb-4 fw-bold text-dark">Explore Our Trip Collections</h2>
+
+      {error && (
+        <div className="alert alert-danger text-center animate__animated animate__fadeIn">
+          <i className="bi bi-exclamation-triangle-fill me-2"></i>
+          {error}
+        </div>
+      )}
 
       {/* 🔍 Dynamic Filters */}
       <Row className="mb-4 gx-3">
