@@ -3,6 +3,8 @@ import { Container, Row, Col, Spinner, Alert } from "react-bootstrap";
 import axios from "axios";
 import PlaceList from "../../components/PlaceList";
 
+const API_URL = process.env.REACT_APP_API_URL || "";
+
 const Wishlist = () => {
     const [wishlist, setWishlist] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,7 +18,7 @@ const Wishlist = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await axios.get("/api/auth/wishlist", {
+            const res = await axios.get(`${API_URL}/api/auth/wishlist`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setWishlist(res.data);

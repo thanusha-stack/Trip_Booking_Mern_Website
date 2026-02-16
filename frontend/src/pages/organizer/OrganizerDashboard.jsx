@@ -4,6 +4,8 @@ import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
+const API_URL = process.env.REACT_APP_API_URL || "";
+
 const OrganizerDashboard = () => {
     const { user } = useAuth();
     const [trips, setTrips] = useState([]);
@@ -15,14 +17,14 @@ const OrganizerDashboard = () => {
     }, [user.id]);
 
     const fetchTrips = () => {
-        axios.get(`/api/trips?organizerId=${user.id}`)
+        axios.get(`${API_URL}/api/trips?organizerId=${user.id}`)
             .then(res => setTrips(res.data))
             .catch(err => console.error(err));
     };
 
     const fetchBookings = () => {
         const token = localStorage.getItem("token");
-        axios.get("/api/bookings/organizer-bookings", {
+        axios.get(`${API_URL}/api/bookings/organizer-bookings`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setBookings(res.data))
@@ -34,7 +36,7 @@ const OrganizerDashboard = () => {
 
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`/api/trips/${id}`, {
+            await axios.delete(`${API_URL}/api/trips/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchTrips(); // Refresh the list

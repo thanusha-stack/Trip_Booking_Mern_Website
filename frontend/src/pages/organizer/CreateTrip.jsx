@@ -3,6 +3,8 @@ import { Container, Form, Button, Row, Col, Alert } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const API_URL = process.env.REACT_APP_API_URL || "";
+
 const CreateTrip = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -67,7 +69,7 @@ const CreateTrip = () => {
                 }))
             };
 
-            await axios.post("/api/trips", tripData, {
+            await axios.post(`${API_URL}/api/trips`, tripData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             navigate("/profile");

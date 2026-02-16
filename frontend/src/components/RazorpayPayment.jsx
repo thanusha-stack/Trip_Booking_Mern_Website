@@ -1,5 +1,7 @@
 import { sendReceiptEmail } from "../utils/sendReceiptEmail";
 
+const API_URL = process.env.REACT_APP_API_URL || "";
+
 const RazorpayPayment = ({
   amount,
   disabled,
@@ -11,7 +13,7 @@ const RazorpayPayment = ({
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("/api/razorpay/create-order", {
+      const res = await fetch(`${API_URL}/api/razorpay/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount }),
@@ -29,7 +31,7 @@ const RazorpayPayment = ({
 
         handler: async function (response) {
           try {
-            const bookingResponse = await fetch("/api/bookings", {
+            const bookingResponse = await fetch(`${API_URL}/api/bookings`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

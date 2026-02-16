@@ -3,6 +3,8 @@ import axios from "axios";
 import PlaceList from "../components/PlaceList";
 import { Container, Row, Col, Form, Spinner } from "react-bootstrap";
 
+const API_URL = process.env.REACT_APP_API_URL || "";
+
 function Places() {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ function Places() {
   const fetchTrips = async () => {
     setLoading(true);
     try {
-      let url = "/api/trips";
+      let url = `${API_URL}/api/trips`;
       const params = new URLSearchParams();
       if (filters.destination) params.append("destination", filters.destination);
       if (filters.category !== "All") params.append("category", filters.category);

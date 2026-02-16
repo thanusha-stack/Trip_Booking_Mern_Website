@@ -4,13 +4,15 @@ import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
+const API_URL = process.env.REACT_APP_API_URL || "";
+
 const TouristDashboard = () => {
     const { user } = useAuth();
     const [bookings, setBookings] = useState([]);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        axios.get("/api/bookings/my-bookings", {
+        axios.get(`${API_URL}/api/bookings/my-bookings`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => setBookings(res.data))

@@ -14,6 +14,8 @@ import {
   Alert
 } from "react-bootstrap";
 
+const API_URL = process.env.REACT_APP_API_URL || "";
+
 const Details = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,8 +29,8 @@ const Details = () => {
     const fetchTripAndWishlist = async () => {
       try {
         const [tripRes, userRes] = await Promise.all([
-          axios.get(`/api/trips/${id}`),
-          axios.get("/api/auth/me", {
+          axios.get(`${API_URL}/api/trips/${id}`),
+          axios.get(`${API_URL}/api/auth/me`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
           }).catch(() => null) // Ignore error if not logged in
         ]);
@@ -57,12 +59,12 @@ const Details = () => {
     try {
       const token = localStorage.getItem("token");
       if (isInWishlist) {
-        await axios.delete(`/api/auth/wishlist/${id}`, {
+        await axios.delete(`${API_URL}/api/auth/wishlist/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setIsInWishlist(false);
       } else {
-        await axios.post(`/api/auth/wishlist/${id}`, {}, {
+        await axios.post(`${API_URL}/api/auth/wishlist/${id}`, {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setIsInWishlist(true);

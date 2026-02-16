@@ -3,6 +3,8 @@ import { Container, Form, Button, Row, Col, Alert, Card, Spinner } from "react-b
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 
+const API_URL = process.env.REACT_APP_API_URL || "";
+
 const EditTrip = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -27,7 +29,7 @@ const EditTrip = () => {
     useEffect(() => {
         const fetchTrip = async () => {
             try {
-                const res = await axios.get(`/api/trips/${id}`);
+                const res = await axios.get(`${API_URL}/api/trips/${id}`);
                 const trip = res.data;
                 setFormData({
                     title: trip.title,
@@ -97,7 +99,7 @@ const EditTrip = () => {
                 images: formData.images.split(",").map(img => img.trim()).filter(img => img !== ""),
             };
 
-            await axios.put(`/api/trips/${id}`, tripData, {
+            await axios.put(`${API_URL}/api/trips/${id}`, tripData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSuccess("Trip updated successfully!");
