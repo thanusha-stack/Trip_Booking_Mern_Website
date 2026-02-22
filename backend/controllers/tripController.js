@@ -15,12 +15,13 @@ exports.createTrip = async (req, res) => {
 
 exports.getAllTrips = async (req, res) => {
     try {
-        const { destination, duration, minPrice, maxPrice, category } = req.query;
+        const { destination, duration, minPrice, maxPrice, category, organizerId } = req.query;
         let query = {};
 
         if (destination) query.destination = new RegExp(destination, "i");
         if (duration) query.duration = duration;
         if (category) query.category = category;
+        if (organizerId) query.organizerId = organizerId;
         if (minPrice || maxPrice) {
             query.price = {};
             if (minPrice) query.price.$gte = Number(minPrice);
